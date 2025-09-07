@@ -1,0 +1,53 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems.autoAlign;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.util.LoggedTunableNumber;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AutoAlignConstants {
+
+  public static List<Pose2d> leftPersPose = new ArrayList<>();
+  public static List<Pose2d> rightPersPose = new ArrayList<>();
+  public static List<Pose2d> algaePose = new ArrayList<>();
+
+  public static LoggedTunableNumber xP = new LoggedTunableNumber("AutoAlign/XDrive/kP", 45.0);
+  public static LoggedTunableNumber xI = new LoggedTunableNumber("AutoAlign/XDrive/kI", 0.0);
+  public static LoggedTunableNumber xD = new LoggedTunableNumber("AutoAlign/XDrive/kD", 1.0);
+
+  public static LoggedTunableNumber yP = new LoggedTunableNumber("AutoAlign/yDrive/kP", 45.0);
+  public static LoggedTunableNumber yI = new LoggedTunableNumber("AutoAlign/yDrive/kI", 0.0);
+  public static LoggedTunableNumber yD = new LoggedTunableNumber("AutoAlign/yDrive/kD", 1.0);
+
+  public static LoggedTunableNumber zP = new LoggedTunableNumber("AutoAlign/zDrive/kP", 45.0);
+  public static LoggedTunableNumber zI = new LoggedTunableNumber("AutoAlign/zDrive/kI", 0.0);
+  public static LoggedTunableNumber zD = new LoggedTunableNumber("AutoAlign/zDrive/kD", 1.0);
+
+  public static void setupAutoAlignment() {
+    leftPersPose.add(new Pose2d(3.17, 4.31, Rotation2d.fromDegrees(0)));
+    leftPersPose.add(new Pose2d(3.85, 5.31, Rotation2d.fromDegrees(-62.05)));
+    leftPersPose.add(new Pose2d(5.02, 5.25, Rotation2d.fromDegrees(-118.6)));
+    leftPersPose.add(new Pose2d(5.84, 4.21, Rotation2d.fromDegrees(180.0)));
+    leftPersPose.add(new Pose2d(5.37, 2.94, Rotation2d.fromDegrees(126.79)));
+    leftPersPose.add(new Pose2d(3.59, 2.95, Rotation2d.fromDegrees(55.92)));
+
+    rightPersPose.add(new Pose2d(3.17, 3.84, Rotation2d.fromDegrees(0)));
+    rightPersPose.add(new Pose2d(3.57, 5.16, Rotation2d.fromDegrees(-62.05)));
+    rightPersPose.add(new Pose2d(5.36, 5.11, Rotation2d.fromDegrees(-118.6)));
+    rightPersPose.add(new Pose2d(5.85, 3.92, Rotation2d.fromDegrees(180.0)));
+    rightPersPose.add(new Pose2d(5.12, 2.75, Rotation2d.fromDegrees(124.79)));
+    rightPersPose.add(new Pose2d(3.89, 2.76, Rotation2d.fromDegrees(62.11)));
+
+    algaePose.add(new Pose2d(3.08, 4.01, Rotation2d.fromDegrees(0.0)));
+    algaePose.add(new Pose2d(3.78, 5.22, Rotation2d.fromDegrees(-59.49)));
+    algaePose.add(new Pose2d(5.23, 5.33, Rotation2d.fromDegrees(-120.29)));
+    algaePose.add(new Pose2d(5.94, 4.06, Rotation2d.fromDegrees(180.0)));
+    algaePose.add(new Pose2d(5.13, 2.81, Rotation2d.fromDegrees(119.17)));
+    algaePose.add(new Pose2d(3.75, 2.77, Rotation2d.fromDegrees(58.16)));
+  }
+}
