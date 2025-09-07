@@ -51,6 +51,10 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperIO;
 import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.hopper.HopperIOTalonFX;
+import frc.robot.subsystems.led.LED;
+import frc.robot.subsystems.led.LEDIO;
+import frc.robot.subsystems.led.LEDIOCandle;
+import frc.robot.subsystems.led.LEDIOSim;
 import frc.robot.subsystems.outtake.Outtake;
 import frc.robot.subsystems.outtake.OuttakeIO;
 import frc.robot.subsystems.outtake.OuttakeIOSim;
@@ -78,6 +82,7 @@ public class RobotContainer {
   private final StateMachine states;
   private final Gripper gripper;
   private final Climb climb;
+  private final LED led;
   private final AutoAlign autoAlign;
 
   // Dashboard inputs
@@ -108,6 +113,7 @@ public class RobotContainer {
         elevator = new Elevator(new ElevatorIOTalonFX());
         gripper = new Gripper(new GripperIOTalonFX());
         climb = new Climb(new ClimbIOTalonFX());
+        led = new LED(new LEDIOCandle());
         break;
 
       case SIM:
@@ -131,6 +137,7 @@ public class RobotContainer {
         elevator = new Elevator(new ElevatorIOSim());
         gripper = new Gripper(new GripperIOSim());
         climb = new Climb(new ClimbIOSim());
+        led = new LED(new LEDIOSim());
         break;
 
       default:
@@ -149,6 +156,7 @@ public class RobotContainer {
         elevator = new Elevator(new ElevatorIO() {});
         gripper = new Gripper(new GripperIO() {});
         climb = new Climb(new ClimbIO() {});
+        led = new LED(new LEDIO() {});
         break;
     }
 
@@ -178,7 +186,8 @@ public class RobotContainer {
     climb.resetEncoder();
 
     states =
-        new StateMachine(drive, elevator, hopper, outtake, gripper, climb, autoAlign, controller);
+        new StateMachine(
+            drive, elevator, outtake, gripper, climb, autoAlign, led, controller);
     setupAutoAlignment();
     // Configure the button bindings
     configureButtonBindings();
