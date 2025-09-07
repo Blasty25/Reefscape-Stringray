@@ -42,6 +42,7 @@ import frc.robot.subsystems.autoAlign.AutoAlignConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.outtake.Outtake;
+import frc.robot.util.AllianceFlipUtil;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -121,7 +122,7 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                       : drive.getRotation()));
         },
         drive);
@@ -166,7 +167,7 @@ public class DriveCommands {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)
@@ -223,7 +224,7 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                       : drive.getRotation()));
         },
         drive);
@@ -274,7 +275,7 @@ public class DriveCommands {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)

@@ -10,9 +10,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 public class HopperIOSim implements HopperIO {
   private DCMotorSim hopper;
 
-  private LoggedNetworkBoolean isDetected =
-      new LoggedNetworkBoolean("/Tuning/CorralDetected", false);
-
   public HopperIOSim() {
     hopper =
         new DCMotorSim(

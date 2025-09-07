@@ -55,14 +55,10 @@ import frc.robot.Constants.Mode;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import me.nabdev.pathfinding.Pathfinder;
-import me.nabdev.pathfinding.PathfinderBuilder;
-import me.nabdev.pathfinding.utilities.FieldLoader.Field;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private Pathfinder finder = new PathfinderBuilder(Field.REEFSCAPE_2025).build();
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY =
       new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -111,7 +107,7 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition()
       };
   private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d(7.31, 7.37, Rotation2d.fromDegrees(-144.81)));
   private final Field2d field2d = new Field2d();
 
   public Drive(

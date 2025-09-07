@@ -56,13 +56,7 @@ public class LEDConstants {
   public static final Animation climbedAnimation =
       new SingleFadeAnimation(255, 255, 0, 0, 0, LEDConstants.length);
 
-  public static final Animation blueTwinkle =
-      new TwinkleAnimation(
-          0, 0, 255, 0, 0.6, LEDConstants.length, TwinkleAnimation.TwinklePercent.Percent100);
-
-  public static final Animation yellowTwinkle =
-      new TwinkleAnimation(
-          255, 255, 0, 0, 0.6, LEDConstants.length, TwinkleAnimation.TwinklePercent.Percent100);
+  public static final Animation whiteStrobe = new StrobeAnimation(255, 255, 255, 255, 0.8, LEDConstants.length);
 
   public static final double waveExponent = 0.4;
 

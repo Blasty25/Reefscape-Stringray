@@ -4,7 +4,10 @@
 
 package frc.robot.subsystems.hopper;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.outtake.Outtake;
 import org.littletonrobotics.junction.Logger;
 
 public class Hopper extends SubsystemBase {
@@ -31,6 +34,16 @@ public class Hopper extends SubsystemBase {
 
   public void stop() {
     io.stop();
+  }
+
+  public Command autoIntake(Outtake outtake) {
+    return Commands.run(
+            () -> {
+              setTrackPercent(1.0);
+              outtake.intake();
+            },
+            this)
+        .until(() -> outtake.isDetected());
   }
 
   @Override

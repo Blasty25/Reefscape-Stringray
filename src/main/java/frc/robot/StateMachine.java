@@ -1,4 +1,4 @@
-package frc.robot.util;
+package frc.robot;
 
 import static frc.robot.StateHandlerConstants.controller;
 
@@ -21,7 +21,6 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoints;
 import frc.robot.subsystems.gripper.Gripper;
 import frc.robot.subsystems.gripper.GripperConstants;
-import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.outtake.Outtake;
 import java.util.EnumMap;
@@ -129,7 +128,7 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Climb_Ready)
         .and(stateRequests.get(RobotState.Climb_Pull))
         .onTrue(
-            Commands.sequence(
+            Commands.parallel(
                 forceState(RobotState.Climb_Pull), led.setState(RobotState.Climb_Pull)));
     stateTriggers.get(RobotState.Idle).onTrue(led.setState(RobotState.Idle));
 
@@ -178,6 +177,10 @@ public class StateMachine extends SubsystemBase {
      */
 
     stateTriggers
+        .get(RobotState.Idle)
+        .onTrue(elevator.setTarget(ElevatorSetpoints.INTAKE));
+
+    stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.a())
         .onTrue(
@@ -220,12 +223,12 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.leftBumper())
-        .onTrue(autoAlign.driveToPose(drive, true, elevator.getSetpoint()));
+        .onTrue(autoAlign.driveToAlignWithReef(drive, true, elevator.getSetpoint()));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.rightBumper())
-        .onTrue(autoAlign.driveToPose(drive, false, elevator.getSetpoint()));
+        .onTrue(autoAlign.driveToAlignWithReef(drive, false, elevator.getSetpoint()));
 
     /*
      * Align to Reef pegs during the set Shoot State, e.g you can align
@@ -234,12 +237,12 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Shoot)
         .and(driver.leftBumper())
-        .onTrue(autoAlign.driveToPose(drive, true, elevator.getSetpoint()));
+        .onTrue(autoAlign.driveToAlignWithReef(drive, true, elevator.getSetpoint()));
 
     stateTriggers
         .get(RobotState.Shoot)
         .and(driver.rightBumper())
-        .onTrue(autoAlign.driveToPose(drive, false, elevator.getSetpoint()));
+        .onTrue(autoAlign.driveToAlignWithReef(drive, false, elevator.getSetpoint()));
 
     /* Align to the middle of the too Reef Pegs in order to pick up Algae */
     stateTriggers
@@ -305,6 +308,7 @@ public class StateMachine extends SubsystemBase {
             Commands.sequence(
                 outtake.shoot(),
                 elevator.setTarget(ElevatorSetpoints.INTAKE),
+                forceState(RobotState.Idle),
                 led.setState(RobotState.Idle)));
 
     /*
@@ -373,7 +377,7 @@ public class StateMachine extends SubsystemBase {
   @Override
   public void periodic() {
     if (DriverStation.isDisabled()) {
-      forceState(RobotState.Idle);
+      forceState(RobotState.Idle).schedule();
     }
 
     // Experimental rumble design!

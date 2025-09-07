@@ -37,4 +37,6 @@ public interface OuttakeIO {
   public default void intake() {}
 
   public default void stop() {}
+
+  public default void setSimState(boolean detected) {}
 }

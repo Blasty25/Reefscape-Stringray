@@ -134,4 +134,9 @@ public class OuttakeIOTalonFX implements OuttakeIO {
   public void eject(double eject) {
     talon.setControl(percentOut.withOutput(eject));
   }
+
+  @Override
+  public void setSimState(boolean detected) {
+      
+  }
 }

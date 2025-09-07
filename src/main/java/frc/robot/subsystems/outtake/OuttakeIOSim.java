@@ -84,4 +84,9 @@ public class OuttakeIOSim implements OuttakeIO {
       return;
     }
   }
+
+  @Override
+  public void setSimState(boolean detected) {
+      isDetectedInSim.set(detected);
+  }
 }

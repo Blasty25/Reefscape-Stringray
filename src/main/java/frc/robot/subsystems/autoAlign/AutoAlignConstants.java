@@ -16,17 +16,17 @@ public class AutoAlignConstants {
   public static List<Pose2d> rightPersPose = new ArrayList<>();
   public static List<Pose2d> algaePose = new ArrayList<>();
 
-  public static LoggedTunableNumber xP = new LoggedTunableNumber("AutoAlign/XDrive/kP", 45.0);
+  public static LoggedTunableNumber xP = new LoggedTunableNumber("AutoAlign/XDrive/kP", 5.0);
   public static LoggedTunableNumber xI = new LoggedTunableNumber("AutoAlign/XDrive/kI", 0.0);
-  public static LoggedTunableNumber xD = new LoggedTunableNumber("AutoAlign/XDrive/kD", 1.0);
+  public static LoggedTunableNumber xD = new LoggedTunableNumber("AutoAlign/XDrive/kD", 0.0);
 
-  public static LoggedTunableNumber yP = new LoggedTunableNumber("AutoAlign/yDrive/kP", 45.0);
+  public static LoggedTunableNumber yP = new LoggedTunableNumber("AutoAlign/yDrive/kP", 4.0);
   public static LoggedTunableNumber yI = new LoggedTunableNumber("AutoAlign/yDrive/kI", 0.0);
-  public static LoggedTunableNumber yD = new LoggedTunableNumber("AutoAlign/yDrive/kD", 1.0);
+  public static LoggedTunableNumber yD = new LoggedTunableNumber("AutoAlign/yDrive/kD", 0.0);
 
-  public static LoggedTunableNumber zP = new LoggedTunableNumber("AutoAlign/zDrive/kP", 45.0);
+  public static LoggedTunableNumber zP = new LoggedTunableNumber("AutoAlign/zDrive/kP", 8.0);
   public static LoggedTunableNumber zI = new LoggedTunableNumber("AutoAlign/zDrive/kI", 0.0);
-  public static LoggedTunableNumber zD = new LoggedTunableNumber("AutoAlign/zDrive/kD", 1.0);
+  public static LoggedTunableNumber zD = new LoggedTunableNumber("AutoAlign/zDrive/kD", 0.0);
 
   public static void setupAutoAlignment() {
     leftPersPose.add(new Pose2d(3.17, 4.31, Rotation2d.fromDegrees(0)));
