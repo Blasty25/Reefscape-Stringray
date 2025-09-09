@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Pounds;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.util.LoggedTunableNumber;
+import java.util.EnumMap;
 
 public class ElevatorConstants {
 
@@ -31,6 +32,9 @@ public class ElevatorConstants {
     A2,
     A3
   }
+
+  public static final EnumMap<ElevatorSetpoints, Double> setpointMap =
+      new EnumMap<>(ElevatorSetpoints.class);
 
   // TARGET SETPOINTS in INCHES!!!
   public static final double L4Setpoint = Meters.fromBaseUnits(1.77);

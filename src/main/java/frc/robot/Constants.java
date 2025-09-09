@@ -14,6 +14,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -49,5 +50,13 @@ public final class Constants {
     Climb_Ready,
     Climb_Pull,
     Climb_Stow
+  }
+
+  public static void logMotorStatus(String name, boolean deboundedMotor) {
+    SmartDashboard.putBoolean("Motors/State" + name, deboundedMotor);
+  }
+
+  public static boolean getMotorStatus(String name) {
+    return SmartDashboard.getBoolean("Motors/State" + name, false);
   }
 }

@@ -167,7 +167,9 @@ public class DriveCommands {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
-                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)
@@ -275,7 +277,9 @@ public class DriveCommands {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
                       isFlipped
-                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)

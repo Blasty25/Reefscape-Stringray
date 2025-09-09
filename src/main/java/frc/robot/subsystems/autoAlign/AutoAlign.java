@@ -17,10 +17,9 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoints;
 import frc.robot.util.AllianceFlipUtil;
-
 import org.littletonrobotics.junction.Logger;
 
-public class AutoAlign{
+public class AutoAlign {
 
   private PIDController xPID =
       new PIDController(xP.getAsDouble(), xI.getAsDouble(), xD.getAsDouble());
@@ -36,9 +35,6 @@ public class AutoAlign{
 
   public AutoAlign() {
     zPID.enableContinuousInput(-Math.PI, Math.PI);
-    xPID.setTolerance(0.1);
-    yPID.setTolerance(0.1);
-    zPID.setTolerance(0.1);
   }
 
   public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, ElevatorSetpoints setpoints) {
@@ -105,7 +101,9 @@ public class AutoAlign{
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)
@@ -143,7 +141,9 @@ public class AutoAlign{
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)
@@ -154,7 +154,7 @@ public class AutoAlign{
               zPID.reset(drive.getRotation().getRadians());
             })
         .until(() -> xPID.atSetpoint() && yPID.atSetpoint() && zPID.atSetpoint())
-        .finallyDo(()-> drive.stop());
+        .finallyDo(() -> drive.stop());
   }
 
   public Command driveToPreSelectedPose(Drive drive, Pose2d pose) {
@@ -179,7 +179,9 @@ public class AutoAlign{
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
                           : drive.getRotation()));
             },
             drive)
@@ -190,6 +192,6 @@ public class AutoAlign{
               zPID.reset(drive.getRotation().getRadians());
             })
         .until(() -> xPID.atSetpoint() && yPID.atSetpoint() && zPID.atSetpoint())
-        .finallyDo(()-> drive.stop());
+        .finallyDo(() -> drive.stop());
   }
 }

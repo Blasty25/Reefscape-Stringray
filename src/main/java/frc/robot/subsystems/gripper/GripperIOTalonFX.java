@@ -18,6 +18,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.util.RobotMap.GripperMap;
 
 public class GripperIOTalonFX implements GripperIO {
@@ -83,6 +84,9 @@ public class GripperIOTalonFX implements GripperIO {
     inputs.motorTempCelsius = temperature.getValueAsDouble();
     inputs.motorVelocityRPM = velocity.getValueAsDouble();
     inputs.motorStalled = (inputs.motorCurrentAmps > 30) && (inputs.motorVelocityRPM < 100);
+
+    Constants.logMotorStatus("Gripperw", inputs.motorConnected);
+    if (Constants.getMotorStatus("Gripper")) setVoltage(0.0);
 
     inputs.motorConnected =
         connectedDebouncer.calculate(

@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 
 public class HopperIOTalonFX implements HopperIO {
   private final TalonFX talon;
@@ -75,6 +76,9 @@ public class HopperIOTalonFX implements HopperIO {
     // inputs.motorStalled = (inputs.motorCurrentAmps > 30) &&
     // (inputs.motorVelocityRPM < 100);
 
+    Constants.logMotorStatus("Hopper", inputs.motorConnected);
+    if (Constants.getMotorStatus("Hopper")) setVolts(0.0);
+
     inputs.motorConnected =
         connectedDebouncer.calculate(
             BaseStatusSignal.isAllGood(voltage, statorCurrent, supplyCurrent, temperature));
@@ -83,6 +87,10 @@ public class HopperIOTalonFX implements HopperIO {
   @Override
   public void setTrackPercent(double percent) {
     talon.setControl(dutyCycleOut.withOutput(percent));
+  }
+
+  public void setVolts(double volts) {
+    voltageOut.withOutput(volts);
   }
 
   @Override

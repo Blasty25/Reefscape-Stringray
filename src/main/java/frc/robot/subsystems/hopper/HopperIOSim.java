@@ -5,7 +5,6 @@ import static frc.robot.subsystems.outtake.OuttakeConstants.*;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 public class HopperIOSim implements HopperIO {
   private DCMotorSim hopper;

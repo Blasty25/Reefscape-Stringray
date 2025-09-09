@@ -6,7 +6,6 @@ import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-import com.ctre.phoenix.led.TwinkleAnimation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -56,7 +55,8 @@ public class LEDConstants {
   public static final Animation climbedAnimation =
       new SingleFadeAnimation(255, 255, 0, 0, 0, LEDConstants.length);
 
-  public static final Animation whiteStrobe = new StrobeAnimation(255, 255, 255, 255, 0.8, LEDConstants.length);
+  public static final Animation whiteStrobe =
+      new StrobeAnimation(255, 255, 255, 255, 0.8, LEDConstants.length);
 
   public static final double waveExponent = 0.4;
 

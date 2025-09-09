@@ -34,31 +34,32 @@ public class Outtake extends SubsystemBase {
 
   public Command ejectCorral() {
     return Commands.run(
-        () -> {
-          io.eject(-6);
-        },
-        this)
+            () -> {
+              io.eject(-6);
+            },
+            this)
         .until(() -> !inputs.isCorralDetected);
   }
 
   public Command shoot() {
     return Commands.run(
-        () -> {
-          io.setPercent(1.0);
-          io.setSimState(false);
-        },
-        this)
-        .until(() -> !inputs.isCorralDetected).finallyDo(() -> setPercentOutput(0.0));
+            () -> {
+              io.setPercent(1.0);
+              io.setSimState(false);
+            },
+            this)
+        .until(() -> !inputs.isCorralDetected)
+        .finallyDo(() -> setPercentOutput(0.0));
   }
 
   // Intake corral with 12 volts and stop once its detected!
   public Command intake() {
     return Commands.run(
-        () -> {
-          StateHandlerConstants.rumbleControllers();
-          io.intake();
-        },
-        this)
+            () -> {
+              StateHandlerConstants.rumbleControllers();
+              io.intake();
+            },
+            this)
         .until(() -> inputs.isCorralDetected)
         .finallyDo(() -> StateHandlerConstants.stopRumble());
   }

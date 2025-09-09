@@ -27,6 +27,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.util.RobotMap.OuttakeMap;
 
 public class OuttakeIOTalonFX implements OuttakeIO {
@@ -94,6 +95,9 @@ public class OuttakeIOTalonFX implements OuttakeIO {
         connectedDebouncer.calculate(
             BaseStatusSignal.isAllGood(voltage, statorCurrent, supplyCurrent, temperature));
 
+    Constants.logMotorStatus("Outtake", inputs.motorConnected);
+    if (Constants.getMotorStatus("Outtake")) setVolts(0.0);
+
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.velocityRadPerSec = velocity.getValueAsDouble();
     inputs.motorVoltage = voltage.getValueAsDouble();
@@ -108,7 +112,7 @@ public class OuttakeIOTalonFX implements OuttakeIO {
             && (measurement.distance_mm <= 20.0);
   }
 
-  /*Value from -1 to 1 */
+  /* Value from -1 to 1 */
   @Override
   public void setPercent(double percent) {
     talon.setControl(percentOut.withOutput(percent));
@@ -129,14 +133,16 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     talon.setControl(velocityVoltage.withVelocity(radPerSec));
   }
 
-  /*Eject Corral Backwards at full speed*/
+  /* Eject Corral Backwards at full speed */
   @Override
   public void eject(double eject) {
     talon.setControl(percentOut.withOutput(eject));
   }
 
-  @Override
-  public void setSimState(boolean detected) {
-      
+  public void setVolts(double volts) {
+    voltageOut.withOutput(volts);
   }
+
+  @Override
+  public void setSimState(boolean detected) {}
 }

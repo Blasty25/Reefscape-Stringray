@@ -176,9 +176,7 @@ public class StateMachine extends SubsystemBase {
      * y = L4
      */
 
-    stateTriggers
-        .get(RobotState.Idle)
-        .onTrue(elevator.setTarget(ElevatorSetpoints.INTAKE));
+    stateTriggers.get(RobotState.Idle).onTrue(elevator.setTarget(ElevatorSetpoints.INTAKE));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
