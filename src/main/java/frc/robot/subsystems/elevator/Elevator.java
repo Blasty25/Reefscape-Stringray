@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,6 +31,7 @@ public class Elevator extends SubsystemBase {
   private Timer homingTimer = new Timer();
   private Debouncer homingDebouncer = new Debouncer(0.5);
   private SysIdRoutine routine;
+
   @AutoLogOutput(key = "/Elevator/Setpoint")
   public static ElevatorSetpoints setpoint = ElevatorSetpoints.INTAKE;
 
@@ -47,24 +47,25 @@ public class Elevator extends SubsystemBase {
     setpointMap.put(ElevatorSetpoints.L4, L4Setpoint);
     setpointMap.put(ElevatorSetpoints.A2, A2Setpoint);
     setpointMap.put(ElevatorSetpoints.A3, A3Setpoint);
-    
-    routine = new SysIdRoutine(
-        new Config(
-            null,
-            null,
-            null,
-            (state) -> Logger.recordOutput("Elevator/SysIdTestStateVolts", state.toString())),
-        new Mechanism((volts) -> io.setVolts(volts.in(Volts)),
-            log -> {
-              log.motor("left")
-                  .voltage(inputs.leftVolts)
-                  .current(inputs.leftCurrent)
-                  .linearPosition(inputs.position)
-                  .linearVelocity(inputs.velocity);
-              log.motor("right")
-                  .voltage(inputs.rightVolts)
-                  .current(inputs.rightCurrent);
-            }, this));
+
+    routine =
+        new SysIdRoutine(
+            new Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Elevator/SysIdTestStateVolts", state.toString())),
+            new Mechanism(
+                (volts) -> io.setVolts(volts.in(Volts)),
+                log -> {
+                  log.motor("left")
+                      .voltage(inputs.leftVolts)
+                      .current(inputs.leftCurrent)
+                      .linearPosition(inputs.position)
+                      .linearVelocity(inputs.velocity);
+                  log.motor("right").voltage(inputs.rightVolts).current(inputs.rightCurrent);
+                },
+                this));
   }
 
   public void setVoltage(double volts) {
@@ -77,10 +78,10 @@ public class Elevator extends SubsystemBase {
 
   public Command resetEncoder() {
     return Commands.runOnce(
-        () -> {
-          io.resetEncoder();
-        },
-        this)
+            () -> {
+              io.resetEncoder();
+            },
+            this)
         .ignoringDisable(true);
   }
 
@@ -95,16 +96,17 @@ public class Elevator extends SubsystemBase {
 
   public Command homeElevator() {
     return Commands.startRun(
-        () -> {
-          isHomed = false;
-          homingTimer.restart();
-          homingDebouncer.calculate(false);
-        },
-        () -> {
-          io.setVolts(-4);
-          isHomed = homingDebouncer.calculate(Math.abs(inputs.velocity.in(MetersPerSecond)) <= 0.1);
-        },
-        this)
+            () -> {
+              isHomed = false;
+              homingTimer.restart();
+              homingDebouncer.calculate(false);
+            },
+            () -> {
+              io.setVolts(-4);
+              isHomed =
+                  homingDebouncer.calculate(Math.abs(inputs.velocity.in(MetersPerSecond)) <= 0.1);
+            },
+            this)
         .until(() -> isHomed)
         .finallyDo(
             () -> {
@@ -127,6 +129,13 @@ public class Elevator extends SubsystemBase {
 
   public ElevatorSetpoints getSetpoint() {
     return setpoint;
+  }
+
+  @AutoLogOutput(key = "/Elevator/atSetpoint")
+  public boolean atSetpoint() {
+    double difference =
+        Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters));
+    return difference <= 0.1;
   }
 
   @Override

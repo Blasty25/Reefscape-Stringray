@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.util.RobotMap.ClimbMap;
 
 public class ClimbIOTalonFX implements ClimbIO {
@@ -83,6 +84,9 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.motorSupplyCurrentAmps = motorSupplyCurrentAmps.getValueAsDouble();
     inputs.motorVelocityRadPerSec = motorVelocityRadPerSec.getValueAsDouble();
     inputs.motorAppliedVolts = motorAppliedVolts.getValueAsDouble();
+
+    Constants.logMotorStatus("Climb", inputs.motorConnected);
+    if (!Constants.getMotorStatus("Climb")) setVoltage(0.0);
   }
 
   @Override

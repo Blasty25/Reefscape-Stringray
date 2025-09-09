@@ -77,7 +77,7 @@ public class HopperIOTalonFX implements HopperIO {
     // (inputs.motorVelocityRPM < 100);
 
     Constants.logMotorStatus("Hopper", inputs.motorConnected);
-    if (Constants.getMotorStatus("Hopper")) setVolts(0.0);
+    if (!Constants.getMotorStatus("Hopper")) setVolts(0.0);
 
     inputs.motorConnected =
         connectedDebouncer.calculate(

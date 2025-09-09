@@ -96,7 +96,7 @@ public class OuttakeIOTalonFX implements OuttakeIO {
             BaseStatusSignal.isAllGood(voltage, statorCurrent, supplyCurrent, temperature));
 
     Constants.logMotorStatus("Outtake", inputs.motorConnected);
-    if (Constants.getMotorStatus("Outtake")) setVolts(0.0);
+    if (!Constants.getMotorStatus("Outtake")) setVolts(0.0);
 
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.velocityRadPerSec = velocity.getValueAsDouble();

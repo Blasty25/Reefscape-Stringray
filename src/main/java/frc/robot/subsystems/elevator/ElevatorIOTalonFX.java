@@ -168,7 +168,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                 followerTemperature));
 
     Constants.logMotorStatus("Elevator", inputs.leftConnected);
-    if (Constants.getMotorStatus("Elevator")) setVolts(0.0);
+    if (!Constants.getMotorStatus("Elevator")) setVolts(0.0);
 
     // Setting up PID & FF Values
     if (kP.hasChanged(hashCode())) {

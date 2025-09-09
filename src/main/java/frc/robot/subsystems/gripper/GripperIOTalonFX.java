@@ -86,7 +86,7 @@ public class GripperIOTalonFX implements GripperIO {
     inputs.motorStalled = (inputs.motorCurrentAmps > 30) && (inputs.motorVelocityRPM < 100);
 
     Constants.logMotorStatus("Gripperw", inputs.motorConnected);
-    if (Constants.getMotorStatus("Gripper")) setVoltage(0.0);
+    if (!Constants.getMotorStatus("Gripper")) setVoltage(0.0);
 
     inputs.motorConnected =
         connectedDebouncer.calculate(
