@@ -71,9 +71,9 @@ public class StateMachine extends SubsystemBase {
     stateRequests.put(RobotState.Manual_Score, driver.povLeft());
     stateRequests.put(RobotState.Shoot, driver.rightTrigger());
     stateRequests.put(RobotState.Eject, driver.leftTrigger());
-    stateRequests.put(RobotState.Climb_Ready, driver.povUp());
+    stateRequests.put(RobotState.Climb_Ready, driver.leftTrigger());
     stateRequests.put(RobotState.Climb_Stow, driver.povDown());
-    stateRequests.put(RobotState.Climb_Pull, driver.povRight());
+    stateRequests.put(RobotState.Climb_Pull, driver.rightTrigger());
 
     for (RobotState state : RobotState.values()) {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
@@ -118,7 +118,7 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Idle)
         .and(stateRequests.get(RobotState.Climb_Ready))
         .onTrue(
-            Commands.sequence(
+            Commands.parallel(
                 forceState(RobotState.Climb_Ready), led.setState(RobotState.Climb_Ready)));
     stateTriggers
         .get(RobotState.Climb_Ready)
@@ -213,6 +213,27 @@ public class StateMachine extends SubsystemBase {
                 elevator.setTarget(ElevatorSetpoints.L4),
                 forceState(RobotState.Shoot),
                 led.setState(RobotState.Shoot)));
+
+    /* Change elevator in Shoot States */
+    stateTriggers
+        .get(RobotState.Shoot)
+        .and(driver.a())
+        .onTrue(elevator.setTarget(ElevatorSetpoints.L1));
+
+    stateTriggers
+        .get(RobotState.Shoot)
+        .and(driver.x())
+        .onTrue(elevator.setTarget(ElevatorSetpoints.L2));
+
+    stateTriggers
+        .get(RobotState.Shoot)
+        .and(driver.b())
+        .onTrue(elevator.setTarget(ElevatorSetpoints.L3));
+
+    stateTriggers
+        .get(RobotState.Shoot)
+        .and(driver.y())
+        .onTrue(elevator.setTarget(ElevatorSetpoints.L4));
 
     /*
      * Align to Reef Peg during the set Elevator State, e.g you can align

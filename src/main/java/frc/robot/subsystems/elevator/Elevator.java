@@ -72,10 +72,12 @@ public class Elevator extends SubsystemBase {
     io.setVolts(volts);
   }
 
+  /* Set Position to  */
   public void setPosition(double position, double velocity) {
     io.setControl(position, velocity);
   }
 
+  /* Reset Encoder with a position value of 0 */
   public Command resetEncoder() {
     return Commands.runOnce(
             () -> {
@@ -85,6 +87,7 @@ public class Elevator extends SubsystemBase {
         .ignoringDisable(true);
   }
 
+  /* Set the Elevator Target enum, and also log previous setpoint */
   public Command setTarget(ElevatorSetpoints nextSetpoints) {
     return Commands.runOnce(
         () -> {
@@ -144,6 +147,7 @@ public class Elevator extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.recordOutput("Elevator/TargetHeight", inputs.targetHeight);
 
-    setPosition(setpointMap.get(getSetpoint()), 0.0);
+    // Set Position based on target enum
+    this.setPosition(setpointMap.get(getSetpoint()), 0.0);
   }
 }
