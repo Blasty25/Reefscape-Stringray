@@ -37,6 +37,7 @@ public class StateMachine extends SubsystemBase {
   private Gripper gripper;
   private Climb climb;
   private LED led;
+  private CommandXboxController operatorOveride;
 
   private Map<RobotState, Trigger> stateRequests = new EnumMap<>(RobotState.class);
   private Map<RobotState, Trigger> stateTriggers = new EnumMap<>(RobotState.class);
@@ -55,7 +56,8 @@ public class StateMachine extends SubsystemBase {
       Climb climb,
       AutoAlign autoAlign,
       LED led,
-      CommandXboxController controller) {
+      CommandXboxController controller,
+      CommandXboxController operatorOveride) {
 
     this.drive = drive;
     this.elevator = elevator;
@@ -65,6 +67,7 @@ public class StateMachine extends SubsystemBase {
     this.gripper = gripper;
     this.climb = climb;
     this.led = led;
+    this.operatorOveride = operatorOveride;
 
     stateRequests.put(RobotState.Idle, driver.a());
     stateRequests.put(RobotState.SetElevatorSetpoint, driver.povRight());
@@ -74,6 +77,7 @@ public class StateMachine extends SubsystemBase {
     stateRequests.put(RobotState.Climb_Ready, driver.leftTrigger());
     stateRequests.put(RobotState.Climb_Stow, driver.povDown());
     stateRequests.put(RobotState.Climb_Pull, driver.rightTrigger());
+    stateRequests.put(RobotState.Manual_Elevator, operatorOveride.a());
 
     for (RobotState state : RobotState.values()) {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
@@ -83,6 +87,8 @@ public class StateMachine extends SubsystemBase {
   }
 
   public void enableStateSetup() {
+
+    operatorOveride.x().onTrue(forceState(RobotState.Idle));
 
     // Boolean Checking State Commands
     stateTriggers
@@ -117,9 +123,7 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Idle)
         .and(stateRequests.get(RobotState.Climb_Ready))
-        .onTrue(
-            Commands.parallel(
-                forceState(RobotState.Climb_Ready), led.setState(RobotState.Climb_Ready)));
+        .onTrue(Commands.parallel(forceState(RobotState.Climb_Ready)));
     stateTriggers
         .get(RobotState.Climb_Ready)
         .and(stateRequests.get(RobotState.Climb_Stow))
@@ -183,36 +187,28 @@ public class StateMachine extends SubsystemBase {
         .and(driver.a())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L1),
-                forceState(RobotState.Shoot),
-                led.setState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoints.L1), forceState(RobotState.Shoot)));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.x())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L2),
-                forceState(RobotState.Shoot),
-                led.setState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoints.L2), forceState(RobotState.Shoot)));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.b())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L3),
-                forceState(RobotState.Shoot),
-                led.setState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoints.L3), forceState(RobotState.Shoot)));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.y())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L4),
-                forceState(RobotState.Shoot),
-                led.setState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoints.L4), forceState(RobotState.Shoot)));
 
     /* Change elevator in Shoot States */
     stateTriggers
@@ -268,9 +264,7 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Pre_Algae)
         .onTrue(
             Commands.parallel(
-                autoAlign.driveToAlgaePose(drive),
-                forceState(RobotState.Algae_Setpoint),
-                led.setState(RobotState.Pre_Algae)));
+                autoAlign.driveToAlgaePose(drive), forceState(RobotState.Algae_Setpoint)));
 
     /* If Robot is in Pre Algae then driver has the option to set algae setpoint */
     stateTriggers // Hit x to get to Algae on L3
@@ -278,17 +272,13 @@ public class StateMachine extends SubsystemBase {
         .and(driver.x())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.A3),
-                forceState(RobotState.Algae_Intake),
-                led.setState(RobotState.Pre_Algae)));
+                elevator.setTarget(ElevatorSetpoints.A3), forceState(RobotState.Algae_Intake)));
     stateTriggers // Hit b to get to Algae on L2
         .get(RobotState.Algae_Setpoint)
         .and(driver.b())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.A2),
-                forceState(RobotState.Algae_Intake),
-                led.setState(RobotState.Pre_Algae)));
+                elevator.setTarget(ElevatorSetpoints.A2), forceState(RobotState.Algae_Intake)));
 
     /* Intake Algae into the Gripper */
     stateTriggers
@@ -337,27 +327,19 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.y())
-        .onTrue(
-            Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L4), led.setState(RobotState.Manual_Score)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L4)));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.x())
-        .onTrue(
-            Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L3), led.setState(RobotState.Manual_Score)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L3)));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.b())
-        .onTrue(
-            Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L2), led.setState(RobotState.Manual_Score)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L2)));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.a())
-        .onTrue(
-            Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L1), led.setState(RobotState.Manual_Score)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L1)));
 
     /* Shoot the Coral during Manual Score State, then set it back to Idle */
     stateTriggers
@@ -369,14 +351,10 @@ public class StateMachine extends SubsystemBase {
     /* Commands to set Climb States, one for pull, one for stow, one for ready */
     stateTriggers
         .get(RobotState.Climb_Pull)
-        .onTrue(
-            Commands.parallel(
-                climb.setPosition(ClimbConstants.climbed), led.setState(RobotState.Climb_Pull)));
+        .onTrue(Commands.parallel(climb.setPosition(ClimbConstants.climbed)));
     stateTriggers
         .get(RobotState.Climb_Ready)
-        .onTrue(
-            Commands.parallel(
-                climb.setPosition(ClimbConstants.ready), led.setState(RobotState.Climb_Ready)));
+        .onTrue(Commands.parallel(climb.setPosition(ClimbConstants.ready)));
     stateTriggers
         .get(RobotState.Climb_Stow)
         .onTrue(
@@ -387,7 +365,7 @@ public class StateMachine extends SubsystemBase {
     return Commands.runOnce(
         () -> {
           System.out.println("Changing state to " + nextState);
-
+          led.setState(nextState);
           previousState = state;
           state = nextState;
         });

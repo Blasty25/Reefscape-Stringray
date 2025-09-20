@@ -15,13 +15,11 @@ package frc.robot;
 
 import static frc.robot.StateHandlerConstants.*;
 import static frc.robot.subsystems.autoAlign.AutoAlignConstants.setupAutoAlignment;
-import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -65,12 +63,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
- */
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
@@ -88,9 +80,8 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // controller.setRumble(RumbleType.kBothRumble, 1.0);
+    controller.setRumble(RumbleType.kBothRumble, 1.0);
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -190,21 +181,23 @@ public class RobotContainer {
     // Resetting the Climb Encoder
     climb.resetEncoder();
 
-    states = new StateMachine(drive, elevator, outtake, gripper, climb, autoAlign, led, controller);
+    states =
+        new StateMachine(
+            drive, elevator, outtake, gripper, climb, autoAlign, led, controller, operatorOveride);
     setupAutoAlignment();
     // Configure the button bindings
     configureButtonBindings();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
   private void configureButtonBindings() {
-    StateHandlerConstants.rumbleController(0.5, 5, states);
-                                                                                                                  
+
+    outtake.setDefaultCommand(
+        outtake.overideShoot(
+            () -> -operatorOveride.getLeftTriggerAxis(),
+            () -> -operatorOveride.getRightTriggerAxis()));
+    operatorOveride.a().whileTrue(hopper.overideVoltage(12.0));
+    operatorOveride.b().whileTrue(hopper.overideVoltage(-12.0));
+    operatorOveride.y().whileTrue(elevator.overideElevator(()-> -operatorOveride.getLeftY()));
     drive.setDefaultCommand(
         DriveCommands.AutoIntakeDrive(
             drive,
@@ -213,10 +206,9 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX(),
-            StateHandlerConstants.targetPose,
+            StateHandlerConstants.leftIntakePose,
+            StateHandlerConstants.rightIntakePose,
             1.0));
-
-    // controller.setRumble(RumbleType.kBothRumble, 0.0);
 
     if (DriverStation.isDisabled()) {
       controller
@@ -225,7 +217,9 @@ public class RobotContainer {
               Commands.runOnce(() -> climb.setCoastOverride(() -> true), climb)
                   .ignoringDisable(true));
     }
+
     Commands.runOnce(() -> climb.setCoastOverride(() -> false));
+    controller.setRumble(RumbleType.kBothRumble, 0.0);
     System.out.println("Setup Complete");
   }
 

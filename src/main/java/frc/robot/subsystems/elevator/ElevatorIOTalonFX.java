@@ -31,7 +31,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
 
@@ -166,9 +165,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                 followerStatorCurrent,
                 followerSupplyCurrent,
                 followerTemperature));
-
-    Constants.logMotorStatus("Elevator", inputs.leftConnected);
-    if (!Constants.getMotorStatus("Elevator")) setVolts(0.0);
 
     // Setting up PID & FF Values
     if (kP.hasChanged(hashCode())) {

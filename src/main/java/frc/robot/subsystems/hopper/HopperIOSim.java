@@ -41,6 +41,11 @@ public class HopperIOSim implements HopperIO {
   }
 
   @Override
+  public void setVoltage(double volts) {
+    hopper.setInputVoltage(volts);
+  }
+
+  @Override
   public void setVelocity(double radPerSec) {
     hopper.setAngularVelocity(radPerSec);
   }

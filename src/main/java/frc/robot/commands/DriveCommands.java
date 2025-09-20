@@ -13,16 +13,6 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Centimeters;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static frc.robot.StateHandlerConstants.targetPose;
-
-import com.therekrab.autopilot.APConstraints;
-import com.therekrab.autopilot.APProfile;
-import com.therekrab.autopilot.APTarget;
-import com.therekrab.autopilot.Autopilot;
-import com.therekrab.autopilot.Autopilot.APResult;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -38,7 +28,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.autoAlign.AutoAlignConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.outtake.Outtake;
@@ -61,17 +50,6 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
-
-  private static final APConstraints kConstraints =
-      new APConstraints().withAcceleration(5.0).withJerk(2.0);
-
-  private static final APProfile kProfile =
-      new APProfile(kConstraints)
-          .withErrorXY(Centimeters.of(2))
-          .withErrorTheta(Degrees.of(1.5))
-          .withBeelineRadius(Centimeters.of(8));
-
-  public static final Autopilot kAutopilot = new Autopilot(kProfile);
 
   private DriveCommands() {}
 
@@ -128,55 +106,6 @@ public class DriveCommands {
         drive);
   }
 
-  public static APTarget m_Target;
-
-  public static Command autoPilot(Drive drive) {
-    ProfiledPIDController angleController =
-        new ProfiledPIDController(
-            ANGLE_KP,
-            0.0,
-            ANGLE_KD,
-            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-    angleController.enableContinuousInput(-Math.PI, Math.PI);
-    return Commands.startRun(
-            () -> {
-              m_Target =
-                  new APTarget(drive.getPose().nearest(AutoAlignConstants.leftPersPose))
-                      .withoutEntryAngle();
-              // .withEntryAngle(
-              // drive.getPose().nearest(AutoAlignConstants.leftPersPose).getRotation());
-            },
-            () -> {
-              ChassisSpeeds currentSpeeds = drive.getChassisSpeeds();
-              Pose2d robot = drive.getPose();
-              APResult out = kAutopilot.calculate(robot, currentSpeeds, m_Target);
-
-              // Calculate angular speed
-              double omega =
-                  angleController.calculate(
-                      drive.getRotation().getRadians(), targetPose.getRotation().getRadians());
-
-              ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      out.vx().in(MetersPerSecond), out.vy().in(MetersPerSecond), omega);
-
-              boolean isFlipped =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Red;
-              drive.runVelocity(
-                  ChassisSpeeds.fromFieldRelativeSpeeds(
-                      speeds,
-                      isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
-                          : drive.getRotation()));
-            },
-            drive)
-        .until(() -> kAutopilot.atTarget(drive.getPose(), m_Target))
-        .finallyDo(() -> drive.stop());
-  }
-
   public static Command AutoIntakeDrive(
       Drive drive,
       Hopper hopper,
@@ -184,7 +113,8 @@ public class DriveCommands {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier,
-      Pose2d targetPose,
+      Pose2d targetPose1,
+      Pose2d targetPose2,
       double range) { // Range can vary but should be 1.0
     return Commands.run(
         () -> {
@@ -200,8 +130,11 @@ public class DriveCommands {
 
           // Creating a Robot Tracking Field Position for auto intaking near Corral
           // Station
-          Pose2d relativePose = targetPose.relativeTo(drive.getPose());
-          if (relativePose.getTranslation().getNorm() <= range) {
+          double distanceFromLeftIntake = targetPose1.getTranslation().getDistance(drive.getPose().getTranslation());
+          double distanceFromRightIntake = targetPose2.getTranslation().getDistance(drive.getPose().getTranslation());
+          Logger.recordOutput("AutoIntake/RelativePose/Pose1", distanceFromLeftIntake);
+          Logger.recordOutput("AutoIntake/RelativePose/Pose2", distanceFromRightIntake);
+          if (distanceFromLeftIntake <= range || distanceFromRightIntake <= range) {
             hopper.setTrackPercent(1.0);
             outtake.intake().schedule();
           } else {
@@ -210,8 +143,8 @@ public class DriveCommands {
             outtake.stop();
           }
 
-          Logger.recordOutput("RobotState/IntakePose", targetPose);
-          Logger.recordOutput("RobotState/Intake/Range", relativePose.getTranslation().getNorm());
+          Logger.recordOutput("RobotState/IntakePose", targetPose1);
+          Logger.recordOutput("RobotState/IntakePose", targetPose2);
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =

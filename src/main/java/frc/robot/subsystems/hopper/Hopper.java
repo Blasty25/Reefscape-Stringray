@@ -32,8 +32,16 @@ public class Hopper extends SubsystemBase {
     io.setVelocity(radPerSec);
   }
 
+  public void setVoltage(double volts) {
+    io.setVoltage(volts);
+  }
+
   public void stop() {
     io.stop();
+  }
+
+  public Command overideVoltage(double volts) {
+    return Commands.runEnd(() -> setVoltage(volts), () -> setVoltage(0.0), this);
   }
 
   public Command autoIntake(Outtake outtake) {

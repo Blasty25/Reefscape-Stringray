@@ -17,7 +17,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
 
 public class HopperIOTalonFX implements HopperIO {
   private final TalonFX talon;
@@ -73,11 +72,7 @@ public class HopperIOTalonFX implements HopperIO {
     inputs.motorCurrent = supplyCurrent.getValueAsDouble();
     inputs.motorTemp = temperature.getValueAsDouble();
     inputs.motorVelocity = velocity.getValueAsDouble();
-    // inputs.motorStalled = (inputs.motorCurrentAmps > 30) &&
-    // (inputs.motorVelocityRPM < 100);
-
-    Constants.logMotorStatus("Hopper", inputs.motorConnected);
-    if (!Constants.getMotorStatus("Hopper")) setVolts(0.0);
+    inputs.motorStalled = (inputs.motorCurrent > 30) && (inputs.motorVelocity < 100);
 
     inputs.motorConnected =
         connectedDebouncer.calculate(

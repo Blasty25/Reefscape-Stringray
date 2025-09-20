@@ -30,6 +30,8 @@ public interface OuttakeIO {
 
   public default void setPercent(double percent) {}
 
+  public default void setVoltage(double volts) {}
+
   public default void setVelocity(double radPerSec) {}
 
   public default void eject(double eject) {}

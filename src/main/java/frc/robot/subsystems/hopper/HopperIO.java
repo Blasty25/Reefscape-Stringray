@@ -9,6 +9,7 @@ public interface HopperIO {
     public double motorVelocity = 0.0;
     public double motorCurrent = 0.0;
     public double motorVolts = 0.0;
+    public boolean motorStalled = false;
 
     public boolean motorConnected = false;
   }
@@ -20,6 +21,8 @@ public interface HopperIO {
   public default void stop() {}
 
   public default void eject(double ejectValue) {}
+
+  public default void setVoltage(double volts) {}
 
   public default void updateInputs(HopperIOInputs inputs) {}
 }

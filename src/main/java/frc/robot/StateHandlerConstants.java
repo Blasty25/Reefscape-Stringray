@@ -13,9 +13,13 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class StateHandlerConstants {
-  public static final Pose2d targetPose = new Pose2d(0.81, 7.56, Rotation2d.fromDegrees(-54.69));
+  public static final Pose2d leftIntakePose =
+      new Pose2d(0.81, 7.56, Rotation2d.fromDegrees(-54.69));
+  public static final Pose2d rightIntakePose =
+      new Pose2d(0.81, 0.38, Rotation2d.fromDegrees(54.69));
 
   public static final CommandXboxController controller = new CommandXboxController(0);
+  public static final CommandXboxController operatorOveride = new CommandXboxController(1);
 
   public static void rumbleControllers() {
     controller.setRumble(RumbleType.kBothRumble, 1.0);

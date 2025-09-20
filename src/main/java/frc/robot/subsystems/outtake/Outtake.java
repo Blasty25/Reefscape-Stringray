@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.StateHandlerConstants;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Outtake extends SubsystemBase {
@@ -62,6 +63,13 @@ public class Outtake extends SubsystemBase {
             this)
         .until(() -> inputs.isCorralDetected)
         .finallyDo(() -> StateHandlerConstants.stopRumble());
+  }
+
+  public Command overideShoot(DoubleSupplier forward, DoubleSupplier backward) {
+    return Commands.runEnd(
+        () -> io.setVoltage((forward.getAsDouble() - backward.getAsDouble()) * 12),
+        () -> io.setVoltage(0.0),
+        this);
   }
 
   public void runVelocity(double velocity) {

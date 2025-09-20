@@ -27,7 +27,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
 import frc.robot.util.RobotMap.OuttakeMap;
 
 public class OuttakeIOTalonFX implements OuttakeIO {
@@ -94,10 +93,6 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     inputs.motorConnected =
         connectedDebouncer.calculate(
             BaseStatusSignal.isAllGood(voltage, statorCurrent, supplyCurrent, temperature));
-
-    Constants.logMotorStatus("Outtake", inputs.motorConnected);
-    if (!Constants.getMotorStatus("Outtake")) setVolts(0.0);
-
     inputs.statorCurrent = statorCurrent.getValueAsDouble();
     inputs.velocityRadPerSec = velocity.getValueAsDouble();
     inputs.motorVoltage = voltage.getValueAsDouble();
@@ -139,7 +134,8 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     talon.setControl(percentOut.withOutput(eject));
   }
 
-  public void setVolts(double volts) {
+  @Override
+  public void setVoltage(double volts) {
     voltageOut.withOutput(volts);
   }
 

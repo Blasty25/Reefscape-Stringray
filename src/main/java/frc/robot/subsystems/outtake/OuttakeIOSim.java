@@ -86,6 +86,11 @@ public class OuttakeIOSim implements OuttakeIO {
   }
 
   @Override
+  public void setVoltage(double volts) {
+    carriage.setInputVoltage(volts);
+  }
+
+  @Override
   public void setSimState(boolean detected) {
     isDetectedInSim.set(detected);
   }

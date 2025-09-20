@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoints;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -70,6 +71,14 @@ public class Elevator extends SubsystemBase {
 
   public void setVoltage(double volts) {
     io.setVolts(volts);
+  }
+
+  public Command overideElevator(DoubleSupplier volts) {
+    return Commands.run(
+        () -> {
+          io.setVolts(volts.getAsDouble() * 12);
+        },
+        this);
   }
 
   /* Set Position to  */
