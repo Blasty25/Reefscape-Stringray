@@ -93,13 +93,6 @@ public class StateMachine extends SubsystemBase {
     // Boolean Checking State Commands
     stateTriggers
         .get(RobotState.Idle)
-        .and(() -> outtake.isDetected())
-        .onTrue(
-            Commands.parallel(
-                forceState(RobotState.SetElevatorSetpoint),
-                led.setState(RobotState.SetElevatorSetpoint)));
-    stateTriggers
-        .get(RobotState.Idle)
         .and(() -> !gripper.getDualDetected())
         .onTrue(gripper.setVoltage(0.0));
 
@@ -107,34 +100,50 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Shoot)
         .and(() -> !outtake.isDetected())
         .onTrue(forceState(RobotState.Idle));
+
     stateTriggers
         .get(RobotState.Idle)
         .and(driver.povRight())
         .onTrue(forceState(RobotState.Manual_Score));
+
     stateTriggers
         .get(RobotState.Idle)
         .and(driver.leftBumper())
         .and(driver.rightBumper())
         .onTrue(forceState(RobotState.Pre_Algae));
+
+    stateTriggers
+        .get(RobotState.Idle)
+        .and(() -> outtake.isDetected())
+        .onTrue(forceState(RobotState.SetElevatorSetpoint));
+
     stateTriggers
         .get(RobotState.Algae_Intake)
         .and(() -> gripper.getDualDetected())
         .onTrue(forceState(RobotState.Algae_Armed));
+
     stateTriggers
         .get(RobotState.Idle)
         .and(stateRequests.get(RobotState.Climb_Ready))
         .onTrue(Commands.parallel(forceState(RobotState.Climb_Ready)));
+
     stateTriggers
         .get(RobotState.Climb_Ready)
         .and(stateRequests.get(RobotState.Climb_Stow))
         .onTrue(forceState(RobotState.Climb_Stow));
+
     stateTriggers
         .get(RobotState.Climb_Ready)
         .and(stateRequests.get(RobotState.Climb_Pull))
         .onTrue(
             Commands.parallel(
                 forceState(RobotState.Climb_Pull), led.setState(RobotState.Climb_Pull)));
-    stateTriggers.get(RobotState.Idle).onTrue(led.setState(RobotState.Idle));
+
+    stateTriggers
+        .get(RobotState.Idle)
+        .onTrue(
+            Commands.sequence(
+                elevator.setTarget(ElevatorSetpoints.INTAKE), elevator.setExtension()));
 
     // State Trigger Commands
 
@@ -150,12 +159,6 @@ public class StateMachine extends SubsystemBase {
                     drive)
                 .ignoringDisable(true));
 
-    /* Stop drive with a X formation */
-    stateTriggers
-        .get(RobotState.Idle)
-        .and(driver.x())
-        .onTrue(Commands.runOnce(drive::stopWithX, drive));
-
     /*
      * Allow the Corral to be ejected if corral is in the Carriage
      * should be used if the Corral is in the carriage at the wrong angle
@@ -164,10 +167,7 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(stateRequests.get(RobotState.Eject))
-        .onTrue(
-            Commands.sequence(
-                led.setState(RobotState.Eject),
-                outtake.ejectCorral().andThen(forceState(RobotState.Idle))));
+        .onTrue(outtake.ejectCorral());
 
     /*
      * The following 4 stateTriggers are elevator setpoints
@@ -180,8 +180,6 @@ public class StateMachine extends SubsystemBase {
      * y = L4
      */
 
-    stateTriggers.get(RobotState.Idle).onTrue(elevator.setTarget(ElevatorSetpoints.INTAKE));
-
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.a())
@@ -191,14 +189,14 @@ public class StateMachine extends SubsystemBase {
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
-        .and(driver.x())
+        .and(driver.b())
         .onTrue(
             Commands.parallel(
                 elevator.setTarget(ElevatorSetpoints.L2), forceState(RobotState.Shoot)));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
-        .and(driver.b())
+        .and(driver.x())
         .onTrue(
             Commands.parallel(
                 elevator.setTarget(ElevatorSetpoints.L3), forceState(RobotState.Shoot)));
@@ -210,40 +208,12 @@ public class StateMachine extends SubsystemBase {
             Commands.parallel(
                 elevator.setTarget(ElevatorSetpoints.L4), forceState(RobotState.Shoot)));
 
-    /* Change elevator in Shoot States */
     stateTriggers
         .get(RobotState.Shoot)
-        .and(driver.a())
-        .onTrue(elevator.setTarget(ElevatorSetpoints.L1));
+        .and(driver.rightTrigger())
+        .onTrue(Commands.sequence(elevator.setExtension()));
 
-    stateTriggers
-        .get(RobotState.Shoot)
-        .and(driver.x())
-        .onTrue(elevator.setTarget(ElevatorSetpoints.L2));
-
-    stateTriggers
-        .get(RobotState.Shoot)
-        .and(driver.b())
-        .onTrue(elevator.setTarget(ElevatorSetpoints.L3));
-
-    stateTriggers
-        .get(RobotState.Shoot)
-        .and(driver.y())
-        .onTrue(elevator.setTarget(ElevatorSetpoints.L4));
-
-    /*
-     * Align to Reef Peg during the set Elevator State, e.g you can align
-     * while elevator is down
-     */
-    stateTriggers
-        .get(RobotState.SetElevatorSetpoint)
-        .and(driver.leftBumper())
-        .onTrue(autoAlign.driveToAlignWithReef(drive, true, elevator.getSetpoint()));
-
-    stateTriggers
-        .get(RobotState.SetElevatorSetpoint)
-        .and(driver.rightBumper())
-        .onTrue(autoAlign.driveToAlignWithReef(drive, false, elevator.getSetpoint()));
+    stateTriggers.get(RobotState.Shoot).and(() -> elevator.atSetpoint()).and(driver.rightTrigger()).onTrue(outtake.shoot());
 
     /*
      * Align to Reef pegs during the set Shoot State, e.g you can align
@@ -310,15 +280,6 @@ public class StateMachine extends SubsystemBase {
         .onTrue(elevator.setTarget(ElevatorSetpoints.L4));
 
     /* Shoot the Coral, and set the Elevator Back down to intake */
-    stateTriggers
-        .get(RobotState.Shoot)
-        .and(driver.rightTrigger())
-        .onTrue(
-            Commands.sequence(
-                outtake.shoot(),
-                elevator.setTarget(ElevatorSetpoints.INTAKE),
-                forceState(RobotState.Idle),
-                led.setState(RobotState.Idle)));
 
     /*
      * Manual Scoring States, be ableto set the elevator to these states, without

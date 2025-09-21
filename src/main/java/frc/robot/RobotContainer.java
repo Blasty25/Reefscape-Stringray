@@ -197,7 +197,7 @@ public class RobotContainer {
             () -> -operatorOveride.getRightTriggerAxis()));
     operatorOveride.a().whileTrue(hopper.overideVoltage(12.0));
     operatorOveride.b().whileTrue(hopper.overideVoltage(-12.0));
-    operatorOveride.y().whileTrue(elevator.overideElevator(()-> -operatorOveride.getLeftY()));
+    operatorOveride.y().whileTrue(elevator.overideElevator(() -> -operatorOveride.getLeftY()));
     drive.setDefaultCommand(
         DriveCommands.AutoIntakeDrive(
             drive,

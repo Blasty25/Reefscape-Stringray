@@ -36,13 +36,15 @@ public interface ElevatorIO {
 
     public boolean leftConnected = false;
     public boolean rightConnected = false;
+
+    public boolean atSetpoint = false;
   }
 
   public default void updateInputs(ElevatorIOInputs inputs) {}
 
   public default void setVolts(double volts) {}
 
-  public default void setControl(double position, double velocity) {}
+  public default void setControl(double position) {}
 
   public default void resetEncoder() {}
 

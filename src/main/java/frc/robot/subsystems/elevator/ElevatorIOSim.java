@@ -32,7 +32,7 @@ public class ElevatorIOSim implements ElevatorIO {
   private double volts = 0.0;
 
   public ElevatorIOSim() {
-    this.pid.setTolerance(0.019);
+    this.pid.setTolerance(0.01);
     this.elevator =
         new ElevatorSim(
             LinearSystemId.createElevatorSystem(gearbox, elevatorMass, drumRadius, gearing),
@@ -89,9 +89,10 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   @Override
-  public void setControl(double position, double velocity) {
-    pid.setGoal(position);
-    setVolts((pid.calculate(elevator.getPositionMeters())));
+  public void setControl(double position) {
+    setVolts(
+        pid.calculate(elevator.getPositionMeters(), position)
+            + ff.calculate(pid.getSetpoint().velocity));
   }
 
   @Override

@@ -214,7 +214,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   }
 
   @Override
-  public void setControl(double position, double velocity) {
+  public void setControl(double position) {
     left.setControl(positionTorque.withPosition(position));
   }
 

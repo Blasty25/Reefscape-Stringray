@@ -130,8 +130,10 @@ public class DriveCommands {
 
           // Creating a Robot Tracking Field Position for auto intaking near Corral
           // Station
-          double distanceFromLeftIntake = targetPose1.getTranslation().getDistance(drive.getPose().getTranslation());
-          double distanceFromRightIntake = targetPose2.getTranslation().getDistance(drive.getPose().getTranslation());
+          double distanceFromLeftIntake =
+              targetPose1.getTranslation().getDistance(drive.getPose().getTranslation());
+          double distanceFromRightIntake =
+              targetPose2.getTranslation().getDistance(drive.getPose().getTranslation());
           Logger.recordOutput("AutoIntake/RelativePose/Pose1", distanceFromLeftIntake);
           Logger.recordOutput("AutoIntake/RelativePose/Pose2", distanceFromRightIntake);
           if (distanceFromLeftIntake <= range || distanceFromRightIntake <= range) {

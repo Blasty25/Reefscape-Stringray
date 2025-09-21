@@ -53,6 +53,10 @@ public class Outtake extends SubsystemBase {
         .finallyDo(() -> setPercentOutput(0.0));
   }
 
+  public Command setSimState(boolean state) {
+    return Commands.runOnce(() -> io.setSimState(state));
+  }
+
   // Intake corral with 12 volts and stop once its detected!
   public Command intake() {
     return Commands.run(

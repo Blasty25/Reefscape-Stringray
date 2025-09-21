@@ -81,9 +81,9 @@ public class Elevator extends SubsystemBase {
         this);
   }
 
-  /* Set Position to  */
+  /* Set Position to ... ... */
   public void setPosition(double position, double velocity) {
-    io.setControl(position, velocity);
+    io.setControl(position);
   }
 
   /* Reset Encoder with a position value of 0 */
@@ -143,11 +143,21 @@ public class Elevator extends SubsystemBase {
     return setpoint;
   }
 
-  @AutoLogOutput(key = "/Elevator/atSetpoint")
+  public Command setExtension(DoubleSupplier meter) {
+    return Commands.run(
+        () -> {
+          inputs.targetHeight = Meters.of(meter.getAsDouble());
+          io.setControl(meter.getAsDouble());
+        },
+        this);
+  }
+
+  public Command setExtension() {
+    return this.setExtension(() -> setpointMap.get(getSetpoint()));
+  }
+
   public boolean atSetpoint() {
-    double difference =
-        Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters));
-    return difference <= 0.1;
+    return setpointMap.get(getSetpoint()) - Math.abs(inputs.position.in(Meters)) <= 0.1;
   }
 
   @Override
@@ -156,7 +166,7 @@ public class Elevator extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.recordOutput("Elevator/TargetHeight", inputs.targetHeight);
 
-    // Set Position based on target enum
-    this.setPosition(setpointMap.get(getSetpoint()), 0.0);
+    inputs.atSetpoint =
+        (Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters))) <= 0.1;
   }
 }
