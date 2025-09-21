@@ -183,7 +183,16 @@ public class RobotContainer {
 
     states =
         new StateMachine(
-            drive, elevator, outtake, gripper, climb, autoAlign, led, controller, operatorOveride);
+            drive,
+            elevator,
+            outtake,
+            gripper,
+            hopper,
+            climb,
+            autoAlign,
+            led,
+            controller,
+            operatorOveride);
     setupAutoAlignment();
     // Configure the button bindings
     configureButtonBindings();
@@ -199,16 +208,11 @@ public class RobotContainer {
     operatorOveride.b().whileTrue(hopper.overideVoltage(-12.0));
     operatorOveride.y().whileTrue(elevator.overideElevator(() -> -operatorOveride.getLeftY()));
     drive.setDefaultCommand(
-        DriveCommands.AutoIntakeDrive(
+        DriveCommands.joystickDrive(
             drive,
-            hopper,
-            outtake,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX(),
-            StateHandlerConstants.leftIntakePose,
-            StateHandlerConstants.rightIntakePose,
-            1.0));
+            () -> -controller.getRightX()));
 
     if (DriverStation.isDisabled()) {
       controller

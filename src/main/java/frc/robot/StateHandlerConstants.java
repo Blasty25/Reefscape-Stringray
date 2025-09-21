@@ -18,6 +18,8 @@ public class StateHandlerConstants {
   public static final Pose2d rightIntakePose =
       new Pose2d(0.81, 0.38, Rotation2d.fromDegrees(54.69));
 
+  public static final Pose2d reefCenterPose = new Pose2d(4.45, 4.05, new Rotation2d());
+
   public static final CommandXboxController controller = new CommandXboxController(0);
   public static final CommandXboxController operatorOveride = new CommandXboxController(1);
 

@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoints;
+import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoint;
 import frc.robot.util.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
@@ -37,7 +37,7 @@ public class AutoAlign {
     zPID.enableContinuousInput(-Math.PI, Math.PI);
   }
 
-  public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, ElevatorSetpoints setpoints) {
+  public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, ElevatorSetpoint setpoints) {
     return Commands.run(
             () -> {
               Pose2d target;
@@ -48,7 +48,7 @@ public class AutoAlign {
                 target = drive.getPose().nearest(rightPersPose);
               }
 
-              if (setpoints.equals(ElevatorSetpoints.L4)) {
+              if (setpoints.equals(ElevatorSetpoint.L4)) {
                 Translation2d translation =
                     new Translation2d(-0.5, 0.0).rotateBy(target.getRotation());
 

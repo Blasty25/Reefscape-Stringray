@@ -39,6 +39,7 @@ public final class Constants {
 
   public static enum RobotState {
     Idle,
+    Intake,
     SetElevatorSetpoint,
     Manual_Elevator,
     Manual_Score,

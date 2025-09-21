@@ -5,7 +5,7 @@ import com.reduxrobotics.sensors.canandcolor.ProximityPeriod;
 public class GripperConstants {
   public static final double AP = 8;
   public static final double A23 = -12;
-  public static final double AN = 9;
+  public static final double AN = 10.4;
 
   public static final double current = 60;
   public static final double currentLower = 40;

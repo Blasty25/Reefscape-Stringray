@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
-import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoints;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -34,20 +33,13 @@ public class Elevator extends SubsystemBase {
   private SysIdRoutine routine;
 
   @AutoLogOutput(key = "/Elevator/Setpoint")
-  public static ElevatorSetpoints setpoint = ElevatorSetpoints.INTAKE;
+  private ElevatorSetpoint setpoint = ElevatorSetpoint.INTAKE;
 
-  @AutoLogOutput(key = "/Elevator/PreviousSetpoint")
-  private ElevatorSetpoints previousSetpoints = ElevatorSetpoints.INTAKE;
+  @AutoLogOutput(key = "/Elevator/NextSetpoint")
+  private ElevatorSetpoint nextSetpoint = ElevatorSetpoint.INTAKE;
 
   public Elevator(ElevatorIO io) {
     this.io = io;
-    setpointMap.put(ElevatorSetpoints.INTAKE, IntakeSetpoint);
-    setpointMap.put(ElevatorSetpoints.L1, L1Setpoint);
-    setpointMap.put(ElevatorSetpoints.L2, L2Setpoint);
-    setpointMap.put(ElevatorSetpoints.L3, L3Setpoint);
-    setpointMap.put(ElevatorSetpoints.L4, L4Setpoint);
-    setpointMap.put(ElevatorSetpoints.A2, A2Setpoint);
-    setpointMap.put(ElevatorSetpoints.A3, A3Setpoint);
 
     routine =
         new SysIdRoutine(
@@ -81,8 +73,8 @@ public class Elevator extends SubsystemBase {
         this);
   }
 
-  /* Set Position to ... ... */
-  public void setPosition(double position, double velocity) {
+  /* Set Position to ... */
+  public void setPosition(double position) {
     io.setControl(position);
   }
 
@@ -96,14 +88,16 @@ public class Elevator extends SubsystemBase {
         .ignoringDisable(true);
   }
 
-  /* Set the Elevator Target enum, and also log previous setpoint */
-  public Command setTarget(ElevatorSetpoints nextSetpoints) {
+  /* Set the Elevator Target enum, for set extension method to move the elevator */
+  public Command setTarget(ElevatorSetpoint height) {
     return Commands.runOnce(
         () -> {
-          System.out.println("Changing Setpoint from " + previousSetpoints + " to " + setpoint);
-          previousSetpoints = setpoint;
-          setpoint = nextSetpoints;
+          nextSetpoint = height;
         });
+  }
+
+  public Command setExtension() {
+    return Commands.runOnce(() -> setpoint = nextSetpoint);
   }
 
   public Command homeElevator() {
@@ -130,7 +124,10 @@ public class Elevator extends SubsystemBase {
             });
   }
 
-  /*Should be able to retune elevator and get better constnats REMEMBER TO SET PID TO 0*/
+  /*
+   * Should be able to retune elevator and get better constnats REMEMBER TO SET
+   * PID TO 0
+   */
   public Command sysId() {
     return Commands.sequence(
         routine.dynamic(Direction.kForward),
@@ -139,25 +136,12 @@ public class Elevator extends SubsystemBase {
         routine.quasistatic(Direction.kReverse));
   }
 
-  public ElevatorSetpoints getSetpoint() {
+  public ElevatorSetpoint getSetpoint() {
     return setpoint;
   }
 
-  public Command setExtension(DoubleSupplier meter) {
-    return Commands.run(
-        () -> {
-          inputs.targetHeight = Meters.of(meter.getAsDouble());
-          io.setControl(meter.getAsDouble());
-        },
-        this);
-  }
-
-  public Command setExtension() {
-    return this.setExtension(() -> setpointMap.get(getSetpoint()));
-  }
-
   public boolean atSetpoint() {
-    return setpointMap.get(getSetpoint()) - Math.abs(inputs.position.in(Meters)) <= 0.1;
+    return getSetpoint().height - Math.abs(inputs.position.in(Meters)) <= 0.1;
   }
 
   @Override
@@ -168,5 +152,7 @@ public class Elevator extends SubsystemBase {
 
     inputs.atSetpoint =
         (Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters))) <= 0.1;
+
+    this.setPosition(getSetpoint().height);
   }
 }

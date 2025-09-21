@@ -11,7 +11,6 @@ import static edu.wpi.first.units.Units.Pounds;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.util.LoggedTunableNumber;
-import java.util.EnumMap;
 
 public class ElevatorConstants {
 
@@ -23,27 +22,21 @@ public class ElevatorConstants {
   public static final boolean simGravity = false;
   public static final DCMotor gearbox = DCMotor.getKrakenX60(2);
 
-  public enum ElevatorSetpoints {
-    INTAKE,
-    L1,
-    L2,
-    L3,
-    L4,
-    A2,
-    A3
+  public enum ElevatorSetpoint {
+    INTAKE(Meters.fromBaseUnits(0.014)),
+    L1(Meters.fromBaseUnits(0.42)),
+    L2(Meters.fromBaseUnits(0.79)),
+    L3(Meters.fromBaseUnits(1.18)),
+    L4(Meters.fromBaseUnits(1.77)),
+    A2(Meters.fromBaseUnits(0.42)),
+    A3(Meters.fromBaseUnits(0.81));
+
+    public double height;
+
+    private ElevatorSetpoint(double height) {
+      this.height = height;
+    }
   }
-
-  public static final EnumMap<ElevatorSetpoints, Double> setpointMap =
-      new EnumMap<>(ElevatorSetpoints.class);
-
-  // TARGET SETPOINTS in INCHES!!!
-  public static final double L4Setpoint = Meters.fromBaseUnits(1.77);
-  public static final double L3Setpoint = Meters.fromBaseUnits(1.18);
-  public static final double L2Setpoint = Meters.fromBaseUnits(0.79);
-  public static final double L1Setpoint = Meters.fromBaseUnits(0.42);
-  public static final double IntakeSetpoint = Meters.fromBaseUnits(0.014);
-  public static final double A2Setpoint = Meters.fromBaseUnits(0.42);
-  public static final double A3Setpoint = Meters.fromBaseUnits(0.81);
 
   public static LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/PID/kP", 45.0);
   public static LoggedTunableNumber kI = new LoggedTunableNumber("Elevator/PID/kI", 0.0);

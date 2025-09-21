@@ -18,17 +18,20 @@ import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoints;
+import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoint;
 import frc.robot.subsystems.gripper.Gripper;
 import frc.robot.subsystems.gripper.GripperConstants;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.outtake.Outtake;
 import java.util.EnumMap;
 import java.util.Map;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class StateMachine extends SubsystemBase {
 
+  // Subsystem references
   private Drive drive;
   private Elevator elevator;
   private Outtake outtake;
@@ -37,22 +40,27 @@ public class StateMachine extends SubsystemBase {
   private Gripper gripper;
   private Climb climb;
   private LED led;
+  private Hopper hopper;
   private CommandXboxController operatorOveride;
 
+  // Maps to store triggers for state requests and state-based conditions
   private Map<RobotState, Trigger> stateRequests = new EnumMap<>(RobotState.class);
   private Map<RobotState, Trigger> stateTriggers = new EnumMap<>(RobotState.class);
 
+  // Logging the current and previous robot state
   @AutoLogOutput(key = "RobotState/CurrentState")
   private RobotState state = RobotState.Idle;
 
   @AutoLogOutput(key = "RobotState/PreviousState")
   private RobotState previousState = RobotState.Idle;
 
+  // Constructor: assign subsystems and configure triggers
   public StateMachine(
       Drive drive,
       Elevator elevator,
       Outtake outtake,
       Gripper gripper,
+      Hopper hopper,
       Climb climb,
       AutoAlign autoAlign,
       LED led,
@@ -67,61 +75,79 @@ public class StateMachine extends SubsystemBase {
     this.gripper = gripper;
     this.climb = climb;
     this.led = led;
+    this.hopper = hopper;
     this.operatorOveride = operatorOveride;
 
+    // Assign controller buttons to state requests
     stateRequests.put(RobotState.Idle, driver.a());
+    stateRequests.put(RobotState.Intake, driver.leftTrigger());
     stateRequests.put(RobotState.SetElevatorSetpoint, driver.povRight());
     stateRequests.put(RobotState.Manual_Score, driver.povLeft());
     stateRequests.put(RobotState.Shoot, driver.rightTrigger());
     stateRequests.put(RobotState.Eject, driver.leftTrigger());
-    stateRequests.put(RobotState.Climb_Ready, driver.leftTrigger());
-    stateRequests.put(RobotState.Climb_Stow, driver.povDown());
+    stateRequests.put(RobotState.Climb_Ready, driver.povDown());
+    stateRequests.put(RobotState.Climb_Stow, driver.povUp());
     stateRequests.put(RobotState.Climb_Pull, driver.rightTrigger());
     stateRequests.put(RobotState.Manual_Elevator, operatorOveride.a());
 
+    // Initialize triggers for each state: true if robot is in that state and enabled
     for (RobotState state : RobotState.values()) {
       stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
     }
 
+    // Set up all state-based triggers and commands
     enableStateSetup();
   }
 
+  // Configure commands associated with each robot state
   public void enableStateSetup() {
 
+    // Operator override to force Idle state
     operatorOveride.x().onTrue(forceState(RobotState.Idle));
 
-    // Boolean Checking State Commands
+    // Stop gripper voltage when Idle and nothing detected
     stateTriggers
         .get(RobotState.Idle)
         .and(() -> !gripper.getDualDetected())
         .onTrue(gripper.setVoltage(0.0));
 
+    // Return to Idle if Shoot state but no outtake detected
     stateTriggers
         .get(RobotState.Shoot)
         .and(() -> !outtake.isDetected())
         .onTrue(forceState(RobotState.Idle));
 
+    // Manual Score state request from POV right
     stateTriggers
         .get(RobotState.Idle)
         .and(driver.povRight())
         .onTrue(forceState(RobotState.Manual_Score));
 
+    // Pre-Algae state triggered by righ trigger
     stateTriggers
         .get(RobotState.Idle)
-        .and(driver.leftBumper())
-        .and(driver.rightBumper())
+        .and(driver.rightTrigger())
         .onTrue(forceState(RobotState.Pre_Algae));
 
+    // Move to SetElevatorSetpoint if outtake detected, otherwise stay Idle
     stateTriggers
         .get(RobotState.Idle)
         .and(() -> outtake.isDetected())
-        .onTrue(forceState(RobotState.SetElevatorSetpoint));
+        .onTrue(forceState(RobotState.SetElevatorSetpoint))
+        .onFalse(forceState(RobotState.Idle));
 
+    // Algae armed state if gripper detects dual
     stateTriggers
         .get(RobotState.Algae_Intake)
         .and(() -> gripper.getDualDetected())
         .onTrue(forceState(RobotState.Algae_Armed));
 
+    stateTriggers
+        .get(RobotState.Algae_Armed)
+        .and(()-> !gripper.getDualDetected())
+        .onTrue(forceState(RobotState.Idle));
+
+    // Climb-related triggers
     stateTriggers
         .get(RobotState.Idle)
         .and(stateRequests.get(RobotState.Climb_Ready))
@@ -135,19 +161,39 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Climb_Ready)
         .and(stateRequests.get(RobotState.Climb_Pull))
-        .onTrue(
-            Commands.parallel(
-                forceState(RobotState.Climb_Pull), led.setState(RobotState.Climb_Pull)));
+        .onTrue(forceState(RobotState.Climb_Pull));
 
+    // Elevator setpoint sequences
     stateTriggers
         .get(RobotState.Idle)
         .onTrue(
             Commands.sequence(
-                elevator.setTarget(ElevatorSetpoints.INTAKE), elevator.setExtension()));
+                elevator.setTarget(ElevatorSetpoint.INTAKE), elevator.setExtension()));
 
-    // State Trigger Commands
+    stateTriggers
+        .get(RobotState.SetElevatorSetpoint)
+        .onTrue(
+            Commands.sequence(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension()));
 
-    /* Reset gyro command */
+    // Shoot trigger when elevator setpoint active
+    stateTriggers
+        .get(RobotState.SetElevatorSetpoint)
+        .and(driver.rightTrigger())
+        .onTrue(outtake.shoot());
+
+    // Intake command while Idle
+    stateTriggers
+        .get(RobotState.Idle)
+        .and(stateRequests.get(RobotState.Intake))
+        .onTrue(Commands.parallel(hopper.intake(), forceState(RobotState.Intake)));
+
+    // Transition to SetElevatorSetpoint if outtake is detected during Intake
+    stateTriggers
+        .get(RobotState.Intake)
+        .and(() -> outtake.isDetected())
+        .onTrue(forceState(RobotState.SetElevatorSetpoint));
+
+    // Reset gyro command while Idle
     stateTriggers
         .get(RobotState.Idle)
         .and(driver.b())
@@ -159,66 +205,62 @@ public class StateMachine extends SubsystemBase {
                     drive)
                 .ignoringDisable(true));
 
-    /*
-     * Allow the Corral to be ejected if corral is in the Carriage
-     * should be used if the Corral is in the carriage at the wrong angle
-     * Control is Left Trigger
-     */
+    // Hopper control during Intake using triggers
+    stateTriggers
+        .get(RobotState.Intake)
+        .and(driver.rightTrigger())
+        .whileTrue(
+            Commands.startEnd(
+                () -> hopper.setTrackPercent(-1.0), () -> hopper.setTrackPercent(0), hopper));
+
+    stateTriggers
+        .get(RobotState.Intake)
+        .and(driver.leftTrigger())
+        .whileTrue(
+            Commands.startEnd(
+                () -> hopper.setTrackPercent(1.0), () -> hopper.setTrackPercent(0), hopper));
+
+    // Eject corral while SetElevatorSetpoint and Eject requested
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(stateRequests.get(RobotState.Eject))
+        .and(driver.a())
         .onTrue(outtake.ejectCorral());
 
-    /*
-     * The following 4 stateTriggers are elevator setpoints
-     * once one of the following, a, x, b or y is pressed,
-     * it will log that setpoint and the elevator will move once
-     * driver is ready.
-     * a = L1
-     * x = L2
-     * b = L3
-     * y = L4
-     */
-
-    stateTriggers
-        .get(RobotState.SetElevatorSetpoint)
-        .and(driver.a())
-        .onTrue(
-            Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L1), forceState(RobotState.Shoot)));
-
+    // Elevator setpoint buttons (L2-L4) and force Shoot state
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.b())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L2), forceState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoint.L2), forceState(RobotState.Shoot)));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.x())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L3), forceState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoint.L3), forceState(RobotState.Shoot)));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.y())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.L4), forceState(RobotState.Shoot)));
+                elevator.setTarget(ElevatorSetpoint.L4), forceState(RobotState.Shoot)));
 
+    // Shoot state right trigger sequence
     stateTriggers
         .get(RobotState.Shoot)
         .and(driver.rightTrigger())
-        .onTrue(Commands.sequence(elevator.setExtension()));
+        .onTrue(
+            Commands.sequence(
+                elevator.setExtension(),
+                Commands.waitUntil(() -> elevator.atSetpoint()),
+                outtake.shoot(),
+                Commands.waitSeconds(0.01)));
 
-    stateTriggers.get(RobotState.Shoot).and(() -> elevator.atSetpoint()).and(driver.rightTrigger()).onTrue(outtake.shoot());
-
-    /*
-     * Align to Reef pegs during the set Shoot State, e.g you can align
-     * while elevator is up, minor adjustments
-     */
+    // Auto-alignment during Shoot using bumpers
     stateTriggers
         .get(RobotState.Shoot)
         .and(driver.leftBumper())
@@ -229,87 +271,85 @@ public class StateMachine extends SubsystemBase {
         .and(driver.rightBumper())
         .onTrue(autoAlign.driveToAlignWithReef(drive, false, elevator.getSetpoint()));
 
-    /* Align to the middle of the too Reef Pegs in order to pick up Algae */
+    // Pre-Algae alignment
     stateTriggers
         .get(RobotState.Pre_Algae)
         .onTrue(
             Commands.parallel(
                 autoAlign.driveToAlgaePose(drive), forceState(RobotState.Algae_Setpoint)));
 
-    /* If Robot is in Pre Algae then driver has the option to set algae setpoint */
-    stateTriggers // Hit x to get to Algae on L3
+    // Algae setpoints (A2-A3) from driver buttons
+    stateTriggers
         .get(RobotState.Algae_Setpoint)
         .and(driver.x())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.A3), forceState(RobotState.Algae_Intake)));
-    stateTriggers // Hit b to get to Algae on L2
+                elevator.setTarget(ElevatorSetpoint.A3), forceState(RobotState.Algae_Intake)));
+
+    stateTriggers
         .get(RobotState.Algae_Setpoint)
         .and(driver.b())
         .onTrue(
             Commands.parallel(
-                elevator.setTarget(ElevatorSetpoints.A2), forceState(RobotState.Algae_Intake)));
+                elevator.setTarget(ElevatorSetpoint.A2), forceState(RobotState.Algae_Intake)));
 
-    /* Intake Algae into the Gripper */
+    // Intake algae into gripper
     stateTriggers
         .get(RobotState.Algae_Intake)
         .and(driver.leftTrigger())
         .onTrue(gripper.setVoltage(GripperConstants.A23));
 
-    /* Once Algae is intaked set Elevator to Intake in order to move */
-    stateTriggers
-        .get(RobotState.Algae_Armed)
-        .onTrue((elevator.setTarget(ElevatorSetpoints.INTAKE)));
+    // Move elevator back to L1 after algae armed
+    stateTriggers.get(RobotState.Algae_Armed).onTrue((elevator.setTarget(ElevatorSetpoint.L1)));
 
-    /* Shoot the Algae using Right Trigger either at the Processer or Barge */
+    // Shoot algae using right trigger & left trigger
     stateTriggers
         .get(RobotState.Algae_Armed)
         .and(driver.rightTrigger())
+        .and(driver.leftTrigger())
         .onTrue(
             Commands.parallel(
                 gripper.setVoltage(GripperConstants.AP),
                 Commands.runOnce(() -> gripper.setSimDetected(false)),
                 Commands.runOnce(() -> System.out.println("Algae Shot")),
-                elevator.setTarget(ElevatorSetpoints.INTAKE),
+                elevator.setTarget(ElevatorSetpoint.INTAKE),
                 forceState(RobotState.Idle)));
 
-    /* Set the Elevator height to the Barge to shoot */
+    // Shoot algae to barge using Y button
     stateTriggers
         .get(RobotState.Algae_Armed)
-        .and(driver.y())
-        .onTrue(elevator.setTarget(ElevatorSetpoints.L4));
+        .and(driver.rightTrigger())
+        .onTrue(
+            Commands.sequence(
+                elevator.setTarget(ElevatorSetpoint.L4),
+                elevator.setExtension(),
+                gripper.setVoltage(GripperConstants.AN)));
 
-    /* Shoot the Coral, and set the Elevator Back down to intake */
-
-    /*
-     * Manual Scoring States, be ableto set the elevator to these states, without
-     * the need of having a Coral
-     */
+    // Manual scoring elevator setpoints
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.y())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L4)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L4)));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.x())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L3)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L3)));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.b())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L2)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L2)));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.a())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoints.L1)));
+        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L1)));
 
-    /* Shoot the Coral during Manual Score State, then set it back to Idle */
+    // Shoot coral during manual score
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(driver.rightTrigger())
         .onTrue(outtake.shoot().andThen(forceState(RobotState.Idle)));
 
-    // ENDGAME!
-    /* Commands to set Climb States, one for pull, one for stow, one for ready */
+    // Climb state commands
     stateTriggers
         .get(RobotState.Climb_Pull)
         .onTrue(Commands.parallel(climb.setPosition(ClimbConstants.climbed)));
@@ -322,6 +362,7 @@ public class StateMachine extends SubsystemBase {
             Commands.parallel(climb.setPosition(ClimbConstants.stow), forceState(RobotState.Idle)));
   }
 
+  // Helper command to force a robot state change
   private Command forceState(RobotState nextState) {
     return Commands.runOnce(
         () -> {
@@ -334,11 +375,20 @@ public class StateMachine extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Force Idle state when disabled
     if (DriverStation.isDisabled()) {
       forceState(RobotState.Idle).schedule();
     }
 
-    // Experimental rumble design!
+    // Logging: check if robot is within 2.5 units of reef center
+    Logger.recordOutput(
+        "Intake",
+        StateHandlerConstants.reefCenterPose
+                .getTranslation()
+                .getDistance(drive.getPose().getTranslation())
+            <= 2.5);
+
+    // Experimental endgame rumble
     if (Timer.getMatchTime() <= 15.0 && DriverStation.isTeleopEnabled()) {
       controller.setRumble(RumbleType.kBothRumble, 0.5);
     }

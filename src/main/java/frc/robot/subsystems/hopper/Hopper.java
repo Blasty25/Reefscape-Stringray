@@ -36,22 +36,38 @@ public class Hopper extends SubsystemBase {
     io.setVoltage(volts);
   }
 
-  public void stop() {
-    io.stop();
-  }
-
   public Command overideVoltage(double volts) {
     return Commands.runEnd(() -> setVoltage(volts), () -> setVoltage(0.0), this);
+  }
+
+  public Command stopHopper() {
+    return Commands.runOnce(() -> io.stop());
   }
 
   public Command autoIntake(Outtake outtake) {
     return Commands.run(
             () -> {
-              setTrackPercent(1.0);
+              this.setTrackPercent(1.0);
               outtake.intake();
             },
             this)
         .until(() -> outtake.isDetected());
+  }
+
+  public Command eject() {
+    return Commands.run(
+        () -> {
+          this.setTrackPercent(-1.0);
+        },
+        this);
+  }
+
+  public Command intake() {
+    return Commands.run(
+        () -> {
+          this.setTrackPercent(1.0);
+        },
+        this);
   }
 
   @Override
