@@ -15,6 +15,7 @@ public class AutoAlignConstants {
   public static List<Pose2d> leftPersPose = new ArrayList<>();
   public static List<Pose2d> rightPersPose = new ArrayList<>();
   public static List<Pose2d> algaePose = new ArrayList<>();
+  public static List<Pose2d> cagePoses = new ArrayList<>();
 
   public static LoggedTunableNumber xP = new LoggedTunableNumber("AutoAlign/XDrive/kP", 5.0);
   public static LoggedTunableNumber xI = new LoggedTunableNumber("AutoAlign/XDrive/kI", 0.0);
@@ -49,5 +50,9 @@ public class AutoAlignConstants {
     algaePose.add(new Pose2d(5.94, 4.06, Rotation2d.fromDegrees(180.0)));
     algaePose.add(new Pose2d(5.13, 2.81, Rotation2d.fromDegrees(119.17)));
     algaePose.add(new Pose2d(3.75, 2.77, Rotation2d.fromDegrees(58.16)));
+
+    cagePoses.add(new Pose2d(8.02, 7.21, new Rotation2d()));
+    cagePoses.add(new Pose2d(8.02, 6.19, new Rotation2d()));
+    cagePoses.add(new Pose2d(8.02, 5.09, new Rotation2d()));
   }
 }

@@ -37,6 +37,7 @@ public class Outtake extends SubsystemBase {
     return Commands.run(
             () -> {
               io.eject(-6);
+              io.setSimState(false);
             },
             this)
         .until(() -> !inputs.isCorralDetected);

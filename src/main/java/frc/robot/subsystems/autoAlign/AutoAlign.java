@@ -35,6 +35,9 @@ public class AutoAlign {
 
   public AutoAlign() {
     zPID.enableContinuousInput(-Math.PI, Math.PI);
+    xPID.setTolerance(0.01);
+    yPID.setTolerance(0.01);
+    zPID.setTolerance(0.01);
   }
 
   public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, ElevatorSetpoint setpoints) {
@@ -161,6 +164,46 @@ public class AutoAlign {
     return Commands.run(
             () -> {
               Logger.recordOutput("AutoAlign/TargetPose", pose);
+              Logger.recordOutput("AutoAlign/xPID", xPID.getError());
+              Logger.recordOutput("AutoAlign/yPID", yPID.getError());
+
+              ChassisSpeeds driveToPoseSpeeds =
+                  new ChassisSpeeds(
+                      xPID.calculate(drive.getPose().getX(), pose.getX()),
+                      yPID.calculate(drive.getPose().getY(), pose.getY()),
+                      zPID.calculate(
+                          drive.getRotation().getRadians(), pose.getRotation().getRadians()));
+
+              // Set Chassis Speeds
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      driveToPoseSpeeds,
+                      isFlipped
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          : drive.getRotation()));
+            },
+            drive)
+        .beforeStarting(
+            () -> {
+              xPID.reset();
+              yPID.reset();
+              zPID.reset(drive.getRotation().getRadians());
+            })
+        .until(() -> xPID.atSetpoint() && yPID.atSetpoint() && zPID.atSetpoint())
+        .finallyDo(() -> drive.stop());
+  }
+
+  public Command driveToCage(Drive drive) {
+    return Commands.run(
+            () -> {
+              Pose2d pose = drive.getPose().nearest(cagePoses);
+
+              Logger.recordOutput("AutoAlign/ClimbPose", pose);
               Logger.recordOutput("AutoAlign/xPID", xPID.getError());
               Logger.recordOutput("AutoAlign/yPID", yPID.getError());
 
