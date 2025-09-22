@@ -78,6 +78,10 @@ public class Elevator extends SubsystemBase {
     io.setControl(position);
   }
 
+  public Command l1Flick(double positionMeters){
+    return Commands.runOnce(()-> this.setPosition(positionMeters), this);
+  }
+
   /* Reset Encoder with a position value of 0 */
   public Command resetEncoder() {
     return Commands.runOnce(
@@ -141,7 +145,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean atSetpoint() {
-    return getSetpoint().height - Math.abs(inputs.position.in(Meters)) <= 0.1;
+    return getSetpoint().height - Math.abs(inputs.position.in(Meters)) <= 0.01;
   }
 
   @Override
@@ -151,7 +155,7 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/TargetHeight", inputs.targetHeight);
 
     inputs.atSetpoint =
-        (Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters))) <= 0.1;
+        (Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters))) <= 0.01;
 
     this.setPosition(getSetpoint().height);
   }
