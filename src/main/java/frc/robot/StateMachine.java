@@ -5,8 +5,6 @@ import static frc.robot.StateHandlerConstants.controller;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,7 +25,6 @@ import frc.robot.subsystems.outtake.Outtake;
 import java.util.EnumMap;
 import java.util.Map;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class StateMachine extends SubsystemBase {
 
@@ -82,7 +79,7 @@ public class StateMachine extends SubsystemBase {
     stateRequests.put(RobotState.Idle, driver.a());
     stateRequests.put(RobotState.Intake, driver.leftTrigger());
     stateRequests.put(RobotState.SetElevatorSetpoint, driver.povRight());
-    stateRequests.put(RobotState.Manual_Score, driver.povLeft());
+    stateRequests.put(RobotState.Manual_Score, operatorOveride.povLeft());
     stateRequests.put(RobotState.Shoot, driver.rightTrigger());
     stateRequests.put(RobotState.Eject, driver.rightTrigger());
     stateRequests.put(RobotState.ClimbReady, driver.povDown());
@@ -168,7 +165,9 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(stateRequests.get(RobotState.RevFunnel))
-        .whileTrue(Commands.parallel(hopper.overideVoltage(-6), outtake.ejectCorral(), forceState(RobotState.Idle)));
+        .whileTrue(
+            Commands.parallel(
+                hopper.overideVoltage(-6), outtake.ejectCorral(), forceState(RobotState.Idle)));
 
     // Elevator setpoint sequences
     stateTriggers
@@ -188,6 +187,14 @@ public class StateMachine extends SubsystemBase {
         .and(driver.rightTrigger())
         .onTrue(Commands.parallel(outtake.shoot(), forceState(RobotState.Idle)));
 
+    // Testing but Hopper and Coral Shooter will move forward while Gripper will intake
+    stateTriggers
+        .get(RobotState.Idle)
+        .and(driver.start())
+        .whileTrue(
+            Commands.parallel(
+                gripper.setVoltage(-12), outtake.overideShoot(6), hopper.overideVoltage(6)));
+
     // Intake command while Idle
     stateTriggers
         .get(RobotState.Idle)
@@ -203,7 +210,7 @@ public class StateMachine extends SubsystemBase {
     // Reset gyro command while Idle
     stateTriggers
         .get(RobotState.Idle)
-        .and(driver.b())
+        .and(driver.povRight())
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -223,9 +230,11 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Intake)
         .and(driver.leftTrigger())
-        .whileTrue(Commands.parallel(
-            Commands.startEnd(
-                () -> hopper.setTrackPercent(1.0), () -> hopper.setTrackPercent(0), hopper), outtake.intake()));
+        .whileTrue(
+            Commands.parallel(
+                Commands.startEnd(
+                    () -> hopper.setTrackPercent(1.0), () -> hopper.setTrackPercent(0), hopper),
+                outtake.intake()));
 
     // Elevator setpoint buttons (L2-L4) and force Shoot state
     stateTriggers
@@ -356,7 +365,7 @@ public class StateMachine extends SubsystemBase {
     // Auto Drive to Closest Cage
     stateTriggers
         .get(RobotState.ClimbReady)
-        .and(driver.leftTrigger())
+        .and(driver.back())
         .onTrue(autoAlign.driveToCage(drive));
     stateTriggers
         .get(RobotState.ClimbStow)
@@ -367,33 +376,35 @@ public class StateMachine extends SubsystemBase {
      * RobotCancelRequests -- Combination of Left or Right Triggers
      */
     // Robot is in Intake and in order to change to Idle - Driver hits A
+    stateTriggers.get(RobotState.Intake).and(driver.povLeft()).onTrue(forceState(RobotState.Idle));
+
     stateTriggers
-        .get(RobotState.Intake)
-        .and(driver.a()) // Button A
+        .get(RobotState.SetElevatorSetpoint)
+        .and(driver.povLeft())
         .onTrue(forceState(RobotState.Idle));
 
     // Robot is Auto Aligning for Algae, Cancel Pre_Algae - Driver hits LT
     stateTriggers
         .get(RobotState.PreAlgae)
-        .and(driver.leftTrigger()) // Left Trigger
+        .and(driver.povLeft())
         .onTrue(forceState(RobotState.Idle));
 
     // Elevator is at Algae Intake Height, Cancel Request is RT - Driver
     stateTriggers
         .get(RobotState.AlgaeSetpoint)
-        .and(stateRequests.get(RobotState.Eject)) // Right Trigger
+        .and(driver.povLeft())
         .onTrue(forceState(RobotState.Idle));
 
     // Robot is Intaking Algae using LT, Cancel Request is RT
     stateTriggers
         .get(RobotState.AlgaeIntake)
-        .and(stateRequests.get(RobotState.Eject)) // Right Trigger
+        .and(driver.povLeft())
         .onTrue(forceState(RobotState.Idle));
 
     // Robot has a Algae, Cancel Request is LT, to Drop Algae, and go back to Idle
     stateTriggers
         .get(RobotState.AlgaeArmed)
-        .and(driver.leftTrigger()) // Left Trigger
+        .and(driver.povLeft())
         .onTrue(Commands.parallel(gripper.setVoltage(12.0), forceState(RobotState.Idle)));
   }
 

@@ -19,7 +19,6 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -81,7 +80,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   public RobotContainer() {
-    controller.setRumble(RumbleType.kBothRumble, 1.0);
+    // controller.setRumble(RumbleType.kBothRumble, 1.0);
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -204,9 +203,11 @@ public class RobotContainer {
         outtake.overideShoot(
             () -> -operatorOveride.getLeftTriggerAxis(),
             () -> -operatorOveride.getRightTriggerAxis()));
+
     operatorOveride.a().whileTrue(hopper.overideVoltage(12.0));
     operatorOveride.b().whileTrue(hopper.overideVoltage(-12.0));
     operatorOveride.y().whileTrue(elevator.overideElevator(() -> -operatorOveride.getLeftY()));
+
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -223,8 +224,9 @@ public class RobotContainer {
     }
 
     Commands.runOnce(() -> climb.setCoastOverride(() -> false));
-    controller.setRumble(RumbleType.kBothRumble, 0.0);
     System.out.println("Setup Complete");
+
+    StateHandlerConstants.rumble(1.0, 5).schedule();
   }
 
   /**

@@ -19,7 +19,6 @@ public class Outtake extends SubsystemBase {
   public Outtake(OuttakeIO io) {
     this.io = io;
     inputs = new OuttakeIOInputsAutoLogged();
-    
   }
 
   public boolean isDetected() {
@@ -76,6 +75,10 @@ public class Outtake extends SubsystemBase {
         () -> io.setVoltage((forward.getAsDouble() - backward.getAsDouble()) * 12),
         () -> io.setVoltage(0.0),
         this);
+  }
+
+  public Command overideShoot(double steadyVolts) {
+    return Commands.runEnd(() -> io.setVoltage(steadyVolts), () -> io.setVoltage(0.0), this);
   }
 
   public void runVelocity(double velocity) {
