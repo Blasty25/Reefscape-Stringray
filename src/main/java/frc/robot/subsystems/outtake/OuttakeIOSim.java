@@ -60,10 +60,7 @@ public class OuttakeIOSim implements OuttakeIO {
   @Override
   public void eject(double eject) {
     if (isDetectedInSim.get()) {
-      setPercent(-1.0);
-      Commands.waitSeconds(1.0);
-      isDetectedInSim.set(false);
-    } else {
+      this.setVoltage(eject);
       isDetectedInSim.set(false);
     }
   }

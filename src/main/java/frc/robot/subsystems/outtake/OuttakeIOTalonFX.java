@@ -12,6 +12,7 @@ import static frc.robot.util.PhoenixUtil.*;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface.TimingBudget;
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -28,6 +29,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.util.RobotMap.OuttakeMap;
+import org.turbojax.TurboLogger;
 
 public class OuttakeIOTalonFX implements OuttakeIO {
   private final TalonFX talon;
@@ -87,8 +89,9 @@ public class OuttakeIOTalonFX implements OuttakeIO {
 
   @Override
   public void updateInputs(OuttakeIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        position, velocity, voltage, statorCurrent, supplyCurrent, temperature);
+    StatusCode status =
+        BaseStatusSignal.refreshAll(
+            position, velocity, voltage, statorCurrent, supplyCurrent, temperature);
 
     inputs.motorConnected =
         connectedDebouncer.calculate(
@@ -105,6 +108,11 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     inputs.isCorralDetected =
         (measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
             && (measurement.distance_mm <= 20.0);
+    TurboLogger.log("Motors/Outtake/Shoot", status.isOK(), "ShootMotor");
+
+    if (TurboLogger.get("ShootMotor", true)) {
+      talon.set(0.0);
+    }
   }
 
   /* Value from -1 to 1 */

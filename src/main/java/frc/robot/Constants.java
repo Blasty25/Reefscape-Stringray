@@ -44,14 +44,15 @@ public final class Constants {
     Manual_Elevator,
     Manual_Score,
     Shoot,
+    RevFunnel,
     Eject,
-    Pre_Algae,
-    Algae_Setpoint,
-    Algae_Intake,
-    Algae_Armed,
-    Climb_Ready,
-    Climb_Pull,
-    Climb_Stow
+    PreAlgae,
+    AlgaeSetpoint,
+    AlgaeIntake,
+    AlgaeArmed,
+    ClimbReady,
+    ClimbPull,
+    ClimbStow
   }
 
   public static void logMotorStatus(String name, boolean deboundedMotor) {

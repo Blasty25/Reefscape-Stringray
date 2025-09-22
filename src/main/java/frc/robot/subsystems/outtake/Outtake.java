@@ -19,6 +19,7 @@ public class Outtake extends SubsystemBase {
   public Outtake(OuttakeIO io) {
     this.io = io;
     inputs = new OuttakeIOInputsAutoLogged();
+    
   }
 
   public boolean isDetected() {

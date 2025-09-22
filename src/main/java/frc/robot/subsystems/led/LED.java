@@ -133,21 +133,21 @@ public class LED extends SubsystemBase {
             case Eject:
               animation = LEDConstants.ejectAnimation;
               break;
-            case Pre_Algae:
+            case PreAlgae:
               animation = LEDConstants.algaeReadyAnimation;
               break;
-            case Climb_Pull:
+            case ClimbPull:
               animation = LEDConstants.climbReadyAnimation;
               break;
-            case Climb_Ready:
+            case ClimbReady:
               if (DriverStation.isDisabled()) {
                 animation = LEDConstants.climbedAnimation;
               } else {
                 animation = LEDConstants.endAnimation;
               }
               break;
-            case Algae_Armed:
-            case Algae_Intake:
+            case AlgaeArmed:
+            case AlgaeIntake:
             default:
               LEDConstants.flowAnimation(io, this);
               break;

@@ -24,7 +24,7 @@ public class StateHandlerConstants {
   public static final CommandXboxController operatorOveride = new CommandXboxController(1);
 
   public static void rumbleControllers() {
-    controller.setRumble(RumbleType.kBothRumble, 1.0);
+    controller.setRumble(RumbleType.kBothRumble, 0.4);
   }
 
   public static void stopRumble() {
