@@ -62,12 +62,11 @@ public class Outtake extends SubsystemBase {
   public Command intake() {
     return Commands.run(
             () -> {
-              StateHandlerConstants.rumbleControllers();
               io.intake();
             },
             this)
         .until(() -> inputs.isCorralDetected)
-        .finallyDo(() -> StateHandlerConstants.stopRumble());
+        .finallyDo(() -> StateHandlerConstants.rumble(0.8, 0.5).schedule());
   }
 
   public Command overideShoot(DoubleSupplier forward, DoubleSupplier backward) {

@@ -32,6 +32,7 @@ public class Gripper extends SubsystemBase {
   }
 
   public Command setVoltage(double voltage) {
+    io.setDetected(false);
     return this.setVoltage(() -> voltage);
   }
 

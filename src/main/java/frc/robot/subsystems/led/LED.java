@@ -130,9 +130,6 @@ public class LED extends SubsystemBase {
             case Shoot:
               animation = LEDConstants.shootCoralAnimation;
               break;
-            case Eject:
-              animation = LEDConstants.ejectAnimation;
-              break;
             case PreAlgae:
               animation = LEDConstants.algaeReadyAnimation;
               break;

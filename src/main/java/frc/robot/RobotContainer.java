@@ -226,7 +226,10 @@ public class RobotContainer {
     Commands.runOnce(() -> climb.setCoastOverride(() -> false));
     System.out.println("Setup Complete");
 
-    StateHandlerConstants.rumble(1.0, 5).schedule();
+    controller.leftStick().onTrue(Commands.runOnce(()-> System.out.println("Left Stick Pressed")));
+    controller.rightStick().onTrue(Commands.runOnce(()-> System.out.println("Right Stick Pressed")));
+
+    StateHandlerConstants.rumble(1.0, 2).ignoringDisable(true).schedule();
   }
 
   /**

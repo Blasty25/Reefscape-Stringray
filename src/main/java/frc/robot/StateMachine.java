@@ -81,12 +81,9 @@ public class StateMachine extends SubsystemBase {
     stateRequests.put(RobotState.SetElevatorSetpoint, driver.povRight());
     stateRequests.put(RobotState.Manual_Score, operatorOveride.povLeft());
     stateRequests.put(RobotState.Shoot, driver.rightTrigger());
-    stateRequests.put(RobotState.Eject, driver.rightTrigger());
     stateRequests.put(RobotState.ClimbReady, driver.povDown());
     stateRequests.put(RobotState.ClimbStow, driver.povUp());
     stateRequests.put(RobotState.ClimbPull, driver.rightTrigger());
-    stateRequests.put(RobotState.Manual_Elevator, operatorOveride.a());
-    stateRequests.put(RobotState.RevFunnel, driver.povUp());
 
     // Initialize triggers for each state: true if robot is in that state and
     // enabled
@@ -119,7 +116,7 @@ public class StateMachine extends SubsystemBase {
     // Manual Score state request from POV right
     stateTriggers
         .get(RobotState.Idle)
-        .and(driver.povRight())
+        .and(operatorOveride.povRight())
         .onTrue(forceState(RobotState.Manual_Score));
 
     // Pre-Algae state triggered by right trigger
@@ -164,7 +161,7 @@ public class StateMachine extends SubsystemBase {
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
-        .and(stateRequests.get(RobotState.RevFunnel))
+        .and(driver.povUp())
         .whileTrue(
             Commands.parallel(
                 hopper.overideVoltage(-6), outtake.ejectCorral(), forceState(RobotState.Idle)));
@@ -185,7 +182,9 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.rightTrigger())
-        .onTrue(Commands.parallel(outtake.shoot(), forceState(RobotState.Idle)));
+        .onTrue(
+            Commands.sequence(
+                outtake.shoot(), Commands.waitSeconds(0.1), forceState(RobotState.Idle)));
 
     // Testing but Hopper and Coral Shooter will move forward while Gripper will intake
     stateTriggers
@@ -230,7 +229,7 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Intake)
         .and(driver.leftTrigger())
-        .whileTrue(
+        .onTrue(
             Commands.parallel(
                 Commands.startEnd(
                     () -> hopper.setTrackPercent(1.0), () -> hopper.setTrackPercent(0), hopper),
@@ -305,11 +304,11 @@ public class StateMachine extends SubsystemBase {
     // Intake algae into gripper
     stateTriggers
         .get(RobotState.AlgaeIntake)
-        .and(driver.leftTrigger())
-        .onTrue(gripper.setVoltage(GripperConstants.A23));
+        .onTrue(
+            Commands.sequence(elevator.setExtension(), gripper.setVoltage(GripperConstants.A23)));
 
     // Move elevator back to L1 after algae armed
-    stateTriggers.get(RobotState.AlgaeArmed).onTrue((elevator.setTarget(ElevatorSetpoint.L1)));
+    stateTriggers.get(RobotState.AlgaeArmed).onTrue((Commands.sequence(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension())));
 
     // Shoot algae using right trigger & left trigger
     stateTriggers
@@ -319,12 +318,11 @@ public class StateMachine extends SubsystemBase {
         .onTrue(
             Commands.parallel(
                 gripper.setVoltage(GripperConstants.AP),
-                Commands.runOnce(() -> gripper.setSimDetected(false)),
                 Commands.runOnce(() -> System.out.println("Algae Shot")),
                 elevator.setTarget(ElevatorSetpoint.INTAKE),
                 forceState(RobotState.Idle)));
 
-    // Shoot algae to barge using RT button
+    // Shoot algae to barge using RT button | Timing has to be tuned
     stateTriggers
         .get(RobotState.AlgaeArmed)
         .and(driver.rightTrigger())
@@ -332,6 +330,7 @@ public class StateMachine extends SubsystemBase {
             Commands.sequence(
                 elevator.setTarget(ElevatorSetpoint.L4),
                 elevator.setExtension(),
+                Commands.waitSeconds(0.6),
                 gripper.setVoltage(GripperConstants.AN)));
 
     // Manual scoring elevator setpoints

@@ -28,7 +28,10 @@ public class StateHandlerConstants {
   }
 
   public static Command rumble(double value, double time) {
-    return Commands.runEnd(() -> controller.setRumble(RumbleType.kBothRumble, 1), () -> controller.setRumble(RumbleType.kBothRumble, 0)).raceWith(Commands.waitSeconds(1));
+    return Commands.runEnd(
+            () -> controller.setRumble(RumbleType.kBothRumble, 1),
+            () -> controller.setRumble(RumbleType.kBothRumble, 0))
+        .raceWith(Commands.waitSeconds(time));
   }
 
   public static void stopRumble() {
