@@ -14,7 +14,6 @@
 package frc.robot;
 
 import static frc.robot.StateHandlerConstants.*;
-import static frc.robot.subsystems.autoAlign.AutoAlignConstants.setupAutoAlignment;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -192,7 +191,6 @@ public class RobotContainer {
             led,
             controller,
             operatorOveride);
-    setupAutoAlignment();
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -223,11 +221,20 @@ public class RobotContainer {
                   .ignoringDisable(true));
     }
 
+    // Run all Outtake while Start == True
+    controller
+        .start()
+        .whileTrue(
+            Commands.parallel(
+                gripper.setVoltage(-12), outtake.overideShoot(6), hopper.overideVoltage(6)));
+
     Commands.runOnce(() -> climb.setCoastOverride(() -> false));
     System.out.println("Setup Complete");
 
-    controller.leftStick().onTrue(Commands.runOnce(()-> System.out.println("Left Stick Pressed")));
-    controller.rightStick().onTrue(Commands.runOnce(()-> System.out.println("Right Stick Pressed")));
+    controller.leftStick().onTrue(Commands.runOnce(() -> System.out.println("Left Stick Pressed")));
+    controller
+        .rightStick()
+        .onTrue(Commands.runOnce(() -> System.out.println("Right Stick Pressed")));
 
     StateHandlerConstants.rumble(1.0, 2).ignoringDisable(true).schedule();
   }

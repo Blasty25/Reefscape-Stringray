@@ -4,13 +4,40 @@
 
 package frc.robot.subsystems.autoAlign;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class AutoAlignConstants {
+
+  public static int getClosestTagId(Pose2d robotPose) {
+    int closestId = -1;
+    double closestDist = Double.MAX_VALUE;
+
+    AprilTagFieldLayout layout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+
+    for (int id = 6; id <= 11; id++) {
+      Optional<Pose3d> tagPose3d = layout.getTagPose(id);
+      if (tagPose3d.isEmpty()) continue;
+
+      Pose2d tagPose2d = tagPose3d.get().toPose2d();
+      double dist = robotPose.getTranslation().getDistance(tagPose2d.getTranslation());
+
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestId = id;
+      }
+    }
+
+    return closestId;
+  }
 
   public static List<Pose2d> leftPersPose = new ArrayList<>();
   public static List<Pose2d> rightPersPose = new ArrayList<>();

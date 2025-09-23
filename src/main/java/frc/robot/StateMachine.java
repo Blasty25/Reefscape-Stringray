@@ -5,6 +5,7 @@ import static frc.robot.StateHandlerConstants.controller;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,6 +26,7 @@ import frc.robot.subsystems.outtake.Outtake;
 import java.util.EnumMap;
 import java.util.Map;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class StateMachine extends SubsystemBase {
 
@@ -186,14 +188,6 @@ public class StateMachine extends SubsystemBase {
             Commands.sequence(
                 outtake.shoot(), Commands.waitSeconds(0.1), forceState(RobotState.Idle)));
 
-    // Testing but Hopper and Coral Shooter will move forward while Gripper will intake
-    stateTriggers
-        .get(RobotState.Idle)
-        .and(driver.start())
-        .whileTrue(
-            Commands.parallel(
-                gripper.setVoltage(-12), outtake.overideShoot(6), hopper.overideVoltage(6)));
-
     // Intake command while Idle
     stateTriggers
         .get(RobotState.Idle)
@@ -308,12 +302,14 @@ public class StateMachine extends SubsystemBase {
             Commands.sequence(elevator.setExtension(), gripper.setVoltage(GripperConstants.A23)));
 
     // Move elevator back to L1 after algae armed
-    stateTriggers.get(RobotState.AlgaeArmed).onTrue((Commands.sequence(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension())));
+    stateTriggers
+        .get(RobotState.AlgaeArmed)
+        .onTrue(
+            (Commands.sequence(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension())));
 
     // Shoot algae using right trigger & left trigger
     stateTriggers
         .get(RobotState.AlgaeArmed)
-        .and(driver.rightTrigger())
         .and(driver.leftTrigger())
         .onTrue(
             Commands.parallel(
@@ -333,23 +329,47 @@ public class StateMachine extends SubsystemBase {
                 Commands.waitSeconds(0.6),
                 gripper.setVoltage(GripperConstants.AN)));
 
-    // Manual scoring elevator setpoints
+    stateTriggers
+        .get(RobotState.AlgaeArmed)
+        .onTrue(
+            Commands.run(
+                () -> {
+                  boolean inRange =
+                      gripper.isRobotInFrontOfBarge(drive.getPose()); // 1.5 == 1.5 Meters
+                  Logger.recordOutput("/LED/inRange", inRange);
+                  if (inRange) {
+                    led.wave(Color.kBlue, Color.kYellow, 20, 3);
+                  }
+                },
+                gripper));
+
+    // Manual scoring elevator setpoints -- More so for testing!
     stateTriggers
         .get(RobotState.Manual_Score)
-        .and(driver.y())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L4)));
+        .and(operatorOveride.y())
+        .onTrue(
+            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L4), elevator.setExtension()));
     stateTriggers
         .get(RobotState.Manual_Score)
-        .and(driver.x())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L3)));
+        .and(operatorOveride.x())
+        .onTrue(
+            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L3), elevator.setExtension()));
     stateTriggers
         .get(RobotState.Manual_Score)
-        .and(driver.b())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L2)));
+        .and(operatorOveride.b())
+        .onTrue(
+            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L2), elevator.setExtension()));
     stateTriggers
         .get(RobotState.Manual_Score)
-        .and(driver.a())
-        .onTrue(Commands.parallel(elevator.setTarget(ElevatorSetpoint.L1)));
+        .and(operatorOveride.a())
+        .onTrue(
+            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension()));
+    stateTriggers
+        .get(RobotState.Manual_Score)
+        .and(operatorOveride.povDown())
+        .onTrue(
+            Commands.parallel(
+                elevator.setTarget(ElevatorSetpoint.INTAKE), elevator.setExtension()));
 
     // Shoot coral during manual score
     stateTriggers.get(RobotState.Manual_Score).and(driver.rightTrigger()).onTrue(outtake.shoot());

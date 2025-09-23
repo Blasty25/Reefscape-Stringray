@@ -78,8 +78,8 @@ public class Elevator extends SubsystemBase {
     io.setControl(position);
   }
 
-  public Command l1Flick(double positionMeters){
-    return Commands.runOnce(()-> this.setPosition(positionMeters), this);
+  public Command l1Flick(double positionMeters) {
+    return Commands.runOnce(() -> this.setPosition(positionMeters), this);
   }
 
   /* Reset Encoder with a position value of 0 */
