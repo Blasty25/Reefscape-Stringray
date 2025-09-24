@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,7 +58,9 @@ public class Elevator extends SubsystemBase {
                       .current(Amps.of(inputs.leftCurrent))
                       .linearPosition(Meters.of(inputs.position))
                       .linearVelocity(MetersPerSecond.of(inputs.velocity));
-                  log.motor("right").voltage(Volts.of(inputs.rightVolts)).current(Amps.of(inputs.rightCurrent));
+                  log.motor("right")
+                      .voltage(Volts.of(inputs.rightVolts))
+                      .current(Amps.of(inputs.rightCurrent));
                 },
                 this));
   }
@@ -95,10 +98,7 @@ public class Elevator extends SubsystemBase {
 
   /* Set the Elevator Target enum, for set extension method to move the elevator */
   public Command setTarget(ElevatorSetpoint height) {
-    return Commands.runOnce(
-        () -> {
-          nextSetpoint = height;
-        });
+    return Commands.runOnce(() -> nextSetpoint = height);
   }
 
   public Command setExtension() {
@@ -114,8 +114,7 @@ public class Elevator extends SubsystemBase {
             },
             () -> {
               io.setVolts(-6);
-              isHomed =
-                  homingDebouncer.calculate(Math.abs(inputs.velocity) <= 0.1);
+              isHomed = homingDebouncer.calculate(Math.abs(inputs.velocity) <= 0.1);
             },
             this)
         .until(() -> isHomed)
@@ -149,14 +148,18 @@ public class Elevator extends SubsystemBase {
     return getSetpoint().height - Math.abs(inputs.position) <= 0.01;
   }
 
+  public boolean isNear() {
+    return MathUtil.isNear(inputs.targetHeight, inputs.position, tolerance);
+  }
+
   @Override
   public void periodic() {
     Logger.processInputs("Elevator", inputs);
     io.updateInputs(inputs);
     Logger.recordOutput("Elevator/TargetHeight", inputs.targetHeight);
+    Logger.recordOutput("Elevator/TalonSetpoint", getSetpoint().height);
 
-    inputs.atSetpoint =
-        (Math.abs(inputs.targetHeight)) - Math.abs(inputs.position) <= 0.01;
+    inputs.atSetpoint = atSetpoint();
     inputs.targetHeight = getSetpoint().height;
     this.setPosition(getSetpoint().height);
   }

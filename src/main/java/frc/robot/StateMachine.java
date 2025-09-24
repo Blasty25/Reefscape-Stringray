@@ -99,7 +99,7 @@ public class StateMachine extends SubsystemBase {
   public void enableStateSetup() {
 
     // Operator override to force Idle state
-    operatorOveride.x().onTrue(forceState(RobotState.Idle));
+    operatorOveride.povUp().onTrue(forceState(RobotState.Idle));
 
     // Stop gripper voltage when Idle and nothing detected
     stateTriggers
@@ -351,22 +351,22 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Manual_Score)
         .and(operatorOveride.x())
         .onTrue(
-            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L3), elevator.setExtension()));
+            Commands.sequence(elevator.setTarget(ElevatorSetpoint.L3), elevator.setExtension()));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(operatorOveride.b())
         .onTrue(
-            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L2), elevator.setExtension()));
+            Commands.sequence(elevator.setTarget(ElevatorSetpoint.L2), elevator.setExtension()));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(operatorOveride.a())
         .onTrue(
-            Commands.parallel(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension()));
+            Commands.sequence(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension()));
     stateTriggers
         .get(RobotState.Manual_Score)
         .and(operatorOveride.povDown())
         .onTrue(
-            Commands.parallel(
+            Commands.sequence(
                 elevator.setTarget(ElevatorSetpoint.INTAKE), elevator.setExtension()));
 
     // Shoot coral during manual score
@@ -423,6 +423,10 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.AlgaeArmed)
         .and(driver.povLeft())
         .onTrue(Commands.parallel(gripper.setVoltage(12.0), forceState(RobotState.Idle)));
+    stateTriggers
+        .get(RobotState.Manual_Score)
+        .and(driver.povLeft())
+        .onTrue(forceState(RobotState.Idle));
   }
 
   // Helper command to force a robot state change

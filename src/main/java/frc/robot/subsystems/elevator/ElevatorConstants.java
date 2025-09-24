@@ -58,5 +58,5 @@ public class ElevatorConstants {
   public static final double drumRadius = 5.0 / 1000.0 * 36 / (2.0 * Math.PI);
   public static final double gearing = (5.0 / 1.0);
   public static final double positionConversionFactor = drumRadius * 2 * Math.PI / gearing;
-  public static final double tolerance = .005;
+  public static final double tolerance = .05;
 }

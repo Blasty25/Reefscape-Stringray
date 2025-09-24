@@ -76,7 +76,8 @@ public class OuttakeIOTalonFX implements OuttakeIO {
         () ->
             BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0, position, velocity, voltage, supplyCurrent, statorCurrent, temperature));
-    tryUntilOk(5, () -> talon.optimizeBusUtilization(0, 1.0));
+
+    talon.optimizeBusUtilization();
 
     // setting up laser can
     try {
