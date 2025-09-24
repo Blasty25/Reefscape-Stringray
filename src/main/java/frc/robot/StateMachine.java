@@ -5,7 +5,6 @@ import static frc.robot.StateHandlerConstants.controller;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,7 +25,6 @@ import frc.robot.subsystems.outtake.Outtake;
 import java.util.EnumMap;
 import java.util.Map;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class StateMachine extends SubsystemBase {
 
@@ -329,19 +327,19 @@ public class StateMachine extends SubsystemBase {
                 Commands.waitSeconds(0.6),
                 gripper.setVoltage(GripperConstants.AN)));
 
-    stateTriggers
-        .get(RobotState.AlgaeArmed)
-        .onTrue(
-            Commands.run(
-                () -> {
-                  boolean inRange =
-                      gripper.isRobotInFrontOfBarge(drive.getPose()); // 1.5 == 1.5 Meters
-                  Logger.recordOutput("/LED/inRange", inRange);
-                  if (inRange) {
-                    led.wave(Color.kBlue, Color.kYellow, 20, 3);
-                  }
-                },
-                gripper));
+    // stateTriggers
+    //     .get(RobotState.AlgaeArmed)
+    //     .onTrue(
+    //         Commands.run(
+    //             () -> {
+    //               boolean inRange =
+    //                   gripper.isRobotInFrontOfBarge(drive.getPose()); // 1.5 == 1.5 Meters
+    //               Logger.recordOutput("/LED/inRange", inRange);
+    //               if (inRange) {
+    //                 led.wave(Color.kBlue, Color.kYellow, 20, 3);
+    //               }
+    //             },
+    //             gripper));
 
     // Manual scoring elevator setpoints -- More so for testing!
     stateTriggers

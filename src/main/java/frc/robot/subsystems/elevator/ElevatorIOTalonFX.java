@@ -16,7 +16,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicExpoDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -54,8 +53,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   private final StatusSignal<Temperature> followerTemperature;
 
   private final VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(false);
-  private final MotionMagicExpoVoltage positionTorque = new MotionMagicExpoVoltage(0.0);
-  
+  private final MotionMagicVoltage positionTorque = new MotionMagicVoltage(0.0).withSlot(0);
 
   private final Debouncer leftConnectedDebounce = new Debouncer(0.5);
   private final Debouncer rightConnectedDebounce = new Debouncer(0.5);
@@ -89,7 +87,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     config.CurrentLimits.SupplyCurrentLowerLimit = supplyCurrentLow;
     config.CurrentLimits.SupplyCurrentLowerTime = 0.0;
 
-    config.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
     config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
     config.Slot0.kP = kP.getAsDouble();
     config.Slot0.kI = kI.getAsDouble();
@@ -146,14 +143,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         followerStatorCurrent,
         followerTemperature);
 
-    inputs.position = Distance.ofBaseUnits(position.getValueAsDouble(), Meters);
-    inputs.velocity = LinearVelocity.ofBaseUnits(velocity.getValueAsDouble(), MetersPerSecond);
+    inputs.position = position.getValueAsDouble();
+    inputs.velocity = velocity.getValueAsDouble();
 
-    inputs.leftCurrent = Current.ofBaseUnits(statorCurrent.getValueAsDouble(), Amps);
-    inputs.rightCurrent = Current.ofBaseUnits(followerStatorCurrent.getValueAsDouble(), Amps);
+    inputs.leftCurrent = statorCurrent.getValueAsDouble();
+    inputs.rightCurrent = followerStatorCurrent.getValueAsDouble();
 
-    inputs.leftVolts = Voltage.ofBaseUnits(voltage.getValueAsDouble(), Volts);
-    inputs.rightVolts = Voltage.ofBaseUnits(followerVoltage.getValueAsDouble(), Volts);
+    inputs.leftVolts = voltage.getValueAsDouble();
+    inputs.rightVolts = followerVoltage.getValueAsDouble();
 
     inputs.leftTemp = temperature.getValueAsDouble();
     inputs.rightTemp = followerTemperature.getValueAsDouble();

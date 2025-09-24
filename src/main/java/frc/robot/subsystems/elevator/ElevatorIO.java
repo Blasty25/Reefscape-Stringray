@@ -4,15 +4,6 @@
 
 package frc.robot.subsystems.elevator;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 /** Add your docs here. */
@@ -20,19 +11,19 @@ public interface ElevatorIO {
 
   @AutoLog
   public static class ElevatorIOInputs {
-    public Distance targetHeight = Meters.zero();
-    public Distance position = Meters.zero();
+    public double targetHeight = 0.0;
+    public double position = 0.0;
 
-    public Voltage leftVolts = Volts.zero();
-    public Voltage rightVolts = Volts.zero();
+    public double leftVolts = 0.0;
+    public double rightVolts = 0.0;
 
-    public Current leftCurrent = Amps.zero();
-    public Current rightCurrent = Amps.zero();
+    public double leftCurrent = 0.0;
+    public double rightCurrent = 0.0;
 
     public double leftTemp = 0.0;
     public double rightTemp = 0.0;
 
-    public LinearVelocity velocity = MetersPerSecond.zero();
+    public double velocity = 0.0;
 
     public boolean leftConnected = false;
     public boolean rightConnected = false;

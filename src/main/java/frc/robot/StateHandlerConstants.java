@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class StateHandlerConstants {
@@ -23,23 +22,10 @@ public class StateHandlerConstants {
   public static final CommandXboxController controller = new CommandXboxController(0);
   public static final CommandXboxController operatorOveride = new CommandXboxController(1);
 
-  public static void rumbleControllers() {
-    controller.setRumble(RumbleType.kBothRumble, 0.4);
-  }
-
   public static Command rumble(double value, double time) {
     return Commands.runEnd(
             () -> controller.setRumble(RumbleType.kBothRumble, 1),
             () -> controller.setRumble(RumbleType.kBothRumble, 0))
         .raceWith(Commands.waitSeconds(time));
-  }
-
-  public static void stopRumble() {
-    controller.setRumble(RumbleType.kBothRumble, 0.0);
-  }
-
-  public static Command rumbleController(double strength, double time, Subsystem subsystem) {
-    return Commands.run(() -> controller.setRumble(RumbleType.kBothRumble, strength), subsystem)
-        .withTimeout(time);
   }
 }

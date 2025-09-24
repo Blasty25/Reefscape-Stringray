@@ -1,9 +1,10 @@
 package frc.robot.subsystems.gripper;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
@@ -60,16 +61,11 @@ public class Gripper extends SubsystemBase {
 
   public boolean isRobotInFrontOfBarge(Pose2d robot) {
     Pose2d barge = new Pose2d(8.67, 6.18, Rotation2d.fromDegrees(-180.0));
-    Transform2d rel = new Transform2d(barge, robot);
-    Logger.recordOutput("/LED/AutoBargePose", barge.relativeTo(robot));
-    double forwardRange = 1.5; // meters in front
-    double sideRange = 0.81; // half barge width + margin
+    double distance = robot.getTranslation().getMeasureX().minus(barge.getMeasureX()).in(Meters);
 
-    return (rel.getX() > 0)
-        && // in front
-        (rel.getX() <= forwardRange)
-        && // within distance
-        (Math.abs(rel.getY()) <= sideRange); // not too far sideways
+    if (Math.abs(distance) <= 1) {}
+
+    return true;
   }
 
   public void setSimDetected(boolean detected) {

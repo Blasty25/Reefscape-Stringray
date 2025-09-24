@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.elevator;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -52,11 +53,11 @@ public class Elevator extends SubsystemBase {
                 (volts) -> io.setVolts(volts.in(Volts)),
                 log -> {
                   log.motor("left")
-                      .voltage(inputs.leftVolts)
-                      .current(inputs.leftCurrent)
-                      .linearPosition(inputs.position)
-                      .linearVelocity(inputs.velocity);
-                  log.motor("right").voltage(inputs.rightVolts).current(inputs.rightCurrent);
+                      .voltage(Volts.of(inputs.leftVolts))
+                      .current(Amps.of(inputs.leftCurrent))
+                      .linearPosition(Meters.of(inputs.position))
+                      .linearVelocity(MetersPerSecond.of(inputs.velocity));
+                  log.motor("right").voltage(Volts.of(inputs.rightVolts)).current(Amps.of(inputs.rightCurrent));
                 },
                 this));
   }
@@ -112,9 +113,9 @@ public class Elevator extends SubsystemBase {
               homingDebouncer.calculate(false);
             },
             () -> {
-              io.setVolts(-4);
+              io.setVolts(-6);
               isHomed =
-                  homingDebouncer.calculate(Math.abs(inputs.velocity.in(MetersPerSecond)) <= 0.1);
+                  homingDebouncer.calculate(Math.abs(inputs.velocity) <= 0.1);
             },
             this)
         .until(() -> isHomed)
@@ -145,7 +146,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean atSetpoint() {
-    return getSetpoint().height - Math.abs(inputs.position.in(Meters)) <= 0.01;
+    return getSetpoint().height - Math.abs(inputs.position) <= 0.01;
   }
 
   @Override
@@ -155,8 +156,8 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/TargetHeight", inputs.targetHeight);
 
     inputs.atSetpoint =
-        (Math.abs(inputs.targetHeight.in(Meters)) - Math.abs(inputs.position.in(Meters))) <= 0.01;
-
+        (Math.abs(inputs.targetHeight)) - Math.abs(inputs.position) <= 0.01;
+    inputs.targetHeight = getSetpoint().height;
     this.setPosition(getSetpoint().height);
   }
 }

@@ -4,10 +4,6 @@
 
 package frc.robot.subsystems.elevator;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -48,16 +44,15 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
     elevator.update(0.02);
-    inputs.leftVolts = Volts.of(volts);
-    inputs.position = Meters.of(elevator.getPositionMeters());
-    inputs.velocity = MetersPerSecond.of(elevator.getVelocityMetersPerSecond());
-    inputs.leftVolts = Volts.of(volts);
-    inputs.rightVolts = Volts.of(volts);
+    inputs.position = elevator.getPositionMeters();
+    inputs.velocity = elevator.getVelocityMetersPerSecond();
+    inputs.leftVolts = volts;
+    inputs.rightVolts = volts;
 
-    inputs.leftCurrent = Amps.of(elevator.getCurrentDrawAmps());
-    inputs.rightCurrent = Amps.of(elevator.getCurrentDrawAmps());
+    inputs.leftCurrent = elevator.getCurrentDrawAmps();
+    inputs.rightCurrent = elevator.getCurrentDrawAmps();
 
-    inputs.targetHeight = Meters.of(pid.getGoal().position);
+    inputs.targetHeight = pid.getGoal().position;
 
     if (kP.hasChanged(hashCode())) {
       pid.setP(kP.getAsDouble());

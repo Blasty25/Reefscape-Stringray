@@ -53,7 +53,6 @@ import frc.robot.subsystems.led.LEDIOSim;
 import frc.robot.subsystems.outtake.Outtake;
 import frc.robot.subsystems.outtake.OuttakeIO;
 import frc.robot.subsystems.outtake.OuttakeIOSim;
-import frc.robot.subsystems.outtake.OuttakeIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -97,8 +96,11 @@ public class RobotContainer {
                 new VisionIOPhotonVision(leftCam, robotToLeftCam),
                 new VisionIOPhotonVision(rightCam, robotToRightCam));
 
-        outtake = new Outtake(new OuttakeIOTalonFX());
+        outtake = new Outtake(new OuttakeIO() {});
+
         hopper = new Hopper(new HopperIOTalonFX());
+        // elevator = new Elevator(new ElevatorIO() {});
+
         elevator = new Elevator(new ElevatorIOTalonFX());
         gripper = new Gripper(new GripperIOTalonFX());
         climb = new Climb(new ClimbIOTalonFX());

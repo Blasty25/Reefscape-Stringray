@@ -9,6 +9,7 @@ import static frc.robot.subsystems.outtake.OuttakeConstants.rangingMode;
 import static frc.robot.subsystems.outtake.OuttakeConstants.regionOfInterest;
 import static frc.robot.util.PhoenixUtil.*;
 
+import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface.TimingBudget;
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -82,7 +83,7 @@ public class OuttakeIOTalonFX implements OuttakeIO {
       can.setRangingMode(rangingMode);
       can.setTimingBudget(TimingBudget.TIMING_BUDGET_33MS);
       can.setRegionOfInterest(regionOfInterest);
-    } catch (Exception e) {
+    } catch (ConfigurationFailedException e) {
       e.printStackTrace();
     }
   }
@@ -101,9 +102,10 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     inputs.motorVoltage = voltage.getValueAsDouble();
     inputs.motorStalled = (inputs.statorCurrent > 30) && (inputs.velocityRadPerSec <= 100);
 
-    var measurement = can.getMeasurement();
+    LaserCan.Measurement measurement = can.getMeasurement();
     inputs.laserCanConnected = (measurement != null);
-    inputs.rawMeasurement = measurement.distance_mm;
+
+    // inputs.rawMeasurement = measurement.distance_mm;
 
     inputs.isCorralDetected =
         (measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
