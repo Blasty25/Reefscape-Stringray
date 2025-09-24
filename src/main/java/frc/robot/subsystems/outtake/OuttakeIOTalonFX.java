@@ -106,16 +106,9 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     LaserCan.Measurement measurement = can.getMeasurement();
     inputs.laserCanConnected = (measurement != null);
 
-    // inputs.rawMeasurement = measurement.distance_mm;
-
     inputs.isCorralDetected =
         (measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
             && (measurement.distance_mm <= 20.0);
-    TurboLogger.log("Motors/Outtake/Shoot", status.isOK(), "ShootMotor");
-
-    if (TurboLogger.get("ShootMotor", true)) {
-      talon.set(0.0);
-    }
   }
 
   /* Value from -1 to 1 */
