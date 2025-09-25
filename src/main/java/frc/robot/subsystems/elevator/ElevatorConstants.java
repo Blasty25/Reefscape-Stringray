@@ -23,13 +23,14 @@ public class ElevatorConstants {
   public static final DCMotor gearbox = DCMotor.getKrakenX60(2);
 
   public enum ElevatorSetpoint {
-    INTAKE(Meters.fromBaseUnits(0.014)),
-    L1(Meters.fromBaseUnits(0.42)),
-    L2(Meters.fromBaseUnits(0.79)),
-    L3(Meters.fromBaseUnits(1.18)),
-    L4(Meters.fromBaseUnits(1.77)),
-    A2(Meters.fromBaseUnits(0.42)),
-    A3(Meters.fromBaseUnits(0.81));
+    INTAKE(0.014),
+    L1(0.42),
+    L1Flick(0.52),
+    L2(0.79),
+    L3(1.18),
+    L4(1.77),
+    A2(0.42),
+    A3(0.81);
 
     public double height;
 
@@ -58,5 +59,5 @@ public class ElevatorConstants {
   public static final double drumRadius = 5.0 / 1000.0 * 36 / (2.0 * Math.PI);
   public static final double gearing = (5.0 / 1.0);
   public static final double positionConversionFactor = drumRadius * 2 * Math.PI / gearing;
-  public static final double tolerance = .05;
+  public static final double tolerance = 0.01;
 }

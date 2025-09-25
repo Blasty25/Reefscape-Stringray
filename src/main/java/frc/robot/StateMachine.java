@@ -123,6 +123,7 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Idle)
         .and(driver.rightTrigger())
+        .and(driver.a())
         .onTrue(forceState(RobotState.PreAlgae));
 
     // Move to SetElevatorSetpoint if outtake detected, otherwise stay Idle
@@ -184,7 +185,10 @@ public class StateMachine extends SubsystemBase {
         .and(driver.rightTrigger())
         .onTrue(
             Commands.sequence(
-                outtake.shoot(), Commands.waitSeconds(0.1), forceState(RobotState.Idle)));
+                elevator.l1Flick(ElevatorSetpoint.L1Flick),
+                outtake.shoot(),
+                Commands.waitSeconds(0.1),
+                forceState(RobotState.Idle)));
 
     // Intake command while Idle
     stateTriggers
@@ -256,9 +260,10 @@ public class StateMachine extends SubsystemBase {
         .onTrue(
             Commands.sequence(
                 elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
+                Commands.waitSeconds(1),
+                Commands.waitUntil(()-> elevator.atSetpoint()),
                 outtake.shoot(),
-                Commands.waitSeconds(0.01)));
+                Commands.waitSeconds(0.1)));
 
     // Auto-alignment during Shoot using bumpers
     stateTriggers
@@ -328,18 +333,18 @@ public class StateMachine extends SubsystemBase {
                 gripper.setVoltage(GripperConstants.AN)));
 
     // stateTriggers
-    //     .get(RobotState.AlgaeArmed)
-    //     .onTrue(
-    //         Commands.run(
-    //             () -> {
-    //               boolean inRange =
-    //                   gripper.isRobotInFrontOfBarge(drive.getPose()); // 1.5 == 1.5 Meters
-    //               Logger.recordOutput("/LED/inRange", inRange);
-    //               if (inRange) {
-    //                 led.wave(Color.kBlue, Color.kYellow, 20, 3);
-    //               }
-    //             },
-    //             gripper));
+    // .get(RobotState.AlgaeArmed)
+    // .onTrue(
+    // Commands.run(
+    // () -> {
+    // boolean inRange =
+    // gripper.isRobotInFrontOfBarge(drive.getPose()); // 1.5 == 1.5 Meters
+    // Logger.recordOutput("/LED/inRange", inRange);
+    // if (inRange) {
+    // led.wave(Color.kBlue, Color.kYellow, 20, 3);
+    // }
+    // },
+    // gripper));
 
     // Manual scoring elevator setpoints -- More so for testing!
     stateTriggers

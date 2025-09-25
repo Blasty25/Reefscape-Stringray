@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -49,14 +50,12 @@ public class AutoAlign extends SubsystemBase {
     Pose2d target =
         leftOrNot ? drive.getPose().nearest(leftPersPose) : drive.getPose().nearest(rightPersPose);
     if (setpoints == ElevatorSetpoint.L4) {
-      // Translate 0.1 inches back relative to target rotation
-      Translation2d translation = new Translation2d(-0.1, 0).rotateBy(target.getRotation());
-      target =
-          new Pose2d(
-              target.getX() + translation.getX(),
-              target.getY() + translation.getY(),
-              target.getRotation());
+      Transform2d relativeTransform =
+          new Transform2d(new Translation2d(0.0, -0.5), new Rotation2d());
+      target = drive.getPose().plus(relativeTransform);
+      Logger.recordOutput("AutoAlign/L4Pose", true);
     }
+    Logger.recordOutput("AutoAlign/L4Pose", false);
 
     Pose2d finalTarget = target;
     return Commands.run(
