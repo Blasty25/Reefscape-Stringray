@@ -4,13 +4,8 @@
 
 package frc.robot.subsystems.outtake;
 
-import static frc.robot.subsystems.outtake.OuttakeConstants.rangingMode;
-import static frc.robot.subsystems.outtake.OuttakeConstants.regionOfInterest;
 import static frc.robot.util.PhoenixUtil.*;
 
-import au.grapplerobotics.ConfigurationFailedException;
-import au.grapplerobotics.LaserCan;
-import au.grapplerobotics.interfaces.LaserCanInterface.TimingBudget;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -24,7 +19,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.reduxrobotics.sensors.canandcolor.Canandcolor;
 import com.reduxrobotics.sensors.canandcolor.CanandcolorSettings;
 import com.reduxrobotics.sensors.canandcolor.ProximityPeriod;
-
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;

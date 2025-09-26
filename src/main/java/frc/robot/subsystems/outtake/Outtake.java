@@ -46,12 +46,15 @@ public class Outtake extends SubsystemBase {
   public Command shoot() {
     return Commands.run(
             () -> {
-              io.setVoltage(5.0);
+              io.setVoltage(
+                  StateHandlerConstants
+                      .OUTTAKE_INTAKE_VOLTAGE); // Says Intake because Intake and Outtake have same
+              // voltage
               io.setSimState(false);
             },
             this)
         .until(() -> !inputs.isCorralDetected)
-        .finallyDo(() -> io.setVoltage(5.0));
+        .finallyDo(() -> io.setVoltage(0.0));
   }
 
   public Command setSimState(boolean state) {

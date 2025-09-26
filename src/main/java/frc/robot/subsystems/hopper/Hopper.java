@@ -47,7 +47,7 @@ public class Hopper extends SubsystemBase {
   public Command autoIntake(Outtake outtake) {
     return Commands.run(
             () -> {
-              this.setTrackPercent(1.0);
+              this.setVoltage(1.0);
               outtake.intake();
             },
             this)
@@ -57,17 +57,19 @@ public class Hopper extends SubsystemBase {
   public Command eject() {
     return Commands.run(
         () -> {
-          this.setTrackPercent(-1.0);
+          this.setVoltage(-12.0);
         },
         this);
   }
 
-  public Command intake() {
+  public Command intake(Outtake outtake, double intakeVolts) {
     return Commands.run(
-        () -> {
-          this.setVoltage(3.0);
-        },
-        this);
+            () -> {
+              this.setVoltage(intakeVolts);
+            },
+            this)
+        .until(() -> outtake.isDetected())
+        .finallyDo(() -> io.stop());
   }
 
   @Override

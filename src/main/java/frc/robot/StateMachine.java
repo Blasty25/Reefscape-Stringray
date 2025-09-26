@@ -172,7 +172,9 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Idle)
         .onTrue(
             Commands.sequence(
-                elevator.setTarget(ElevatorSetpoint.INTAKE), elevator.setExtension(), hopper.stopHopper()));
+                elevator.setTarget(ElevatorSetpoint.INTAKE),
+                elevator.setExtension(),
+                hopper.stopHopper()));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
@@ -194,7 +196,10 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Idle)
         .and(stateRequests.get(RobotState.Intake))
-        .onTrue(Commands.parallel(hopper.intake(), forceState(RobotState.Intake)));
+        .onTrue(
+            Commands.parallel(
+                hopper.intake(outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE),
+                forceState(RobotState.Intake)));
 
     // Transition to SetElevatorSetpoint if outtake is detected during Intake
     stateTriggers
@@ -215,21 +220,21 @@ public class StateMachine extends SubsystemBase {
                 .ignoringDisable(true));
 
     // Hopper control during Intake using triggers
-    stateTriggers
-        .get(RobotState.Intake)
-        .and(driver.rightTrigger())
-        .whileTrue(
-            Commands.startEnd(
-                () -> hopper.setTrackPercent(-1.0), () -> hopper.setTrackPercent(0), hopper));
+    stateTriggers.get(RobotState.Intake).and(driver.rightTrigger()).whileTrue(hopper.eject());
+    // Commands.startEnd(
+    //     () -> hopper.setTrackPercent(-1.0), () -> hopper.setTrackPercent(0), hopper));
 
     stateTriggers
         .get(RobotState.Intake)
         .and(driver.leftTrigger())
         .onTrue(
             Commands.parallel(
-                Commands.startEnd(
-                    () -> hopper.setTrackPercent(1.0), () -> hopper.setTrackPercent(0), hopper),
+                hopper.intake(outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE),
                 outtake.intake()));
+    // Commands.parallel(
+    //     Commands.startEnd(
+    //         () -> hopper.setTrackPercent(1.0), () -> hopper.setTrackPercent(0), hopper),
+    //     outtake.intake()));
 
     // Elevator setpoint buttons (L2-L4) and force Shoot state
     stateTriggers
@@ -269,12 +274,12 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Shoot)
         .and(driver.leftBumper())
-        .onTrue(autoAlign.driveToAlignWithReef(drive, true, elevator.getSetpoint()));
+        .onTrue(autoAlign.driveToAlignWithReef(drive, true, elevator));
 
     stateTriggers
         .get(RobotState.Shoot)
         .and(driver.rightBumper())
-        .onTrue(autoAlign.driveToAlignWithReef(drive, false, elevator.getSetpoint()));
+        .onTrue(autoAlign.driveToAlignWithReef(drive, false, elevator));
 
     // Pre-Algae alignment
     stateTriggers

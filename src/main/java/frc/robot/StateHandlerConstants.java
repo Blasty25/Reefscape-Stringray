@@ -28,4 +28,7 @@ public class StateHandlerConstants {
             () -> controller.setRumble(RumbleType.kBothRumble, 0))
         .raceWith(Commands.waitSeconds(time));
   }
+
+  public static final double HOPPER_INTAKE_VOLTAGE = 3.5;
+  public static final double OUTTAKE_INTAKE_VOLTAGE = 5.0;
 }

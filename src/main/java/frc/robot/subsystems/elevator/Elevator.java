@@ -33,10 +33,10 @@ public class Elevator extends SubsystemBase {
   private Debouncer homingDebouncer = new Debouncer(0.5);
   private SysIdRoutine routine;
 
-  @AutoLogOutput(key = "/Elevator/Setpoint")
+  @AutoLogOutput(key = "Elevator/Setpoint")
   private ElevatorSetpoint setpoint = ElevatorSetpoint.INTAKE;
 
-  @AutoLogOutput(key = "/Elevator/NextSetpoint")
+  @AutoLogOutput(key = "Elevator/NextSetpoint")
   private ElevatorSetpoint nextSetpoint = ElevatorSetpoint.INTAKE;
 
   public Elevator(ElevatorIO io) {
@@ -89,9 +89,13 @@ public class Elevator extends SubsystemBase {
         .ignoringDisable(true);
   }
 
+  public void selectFutureTarget(ElevatorSetpoint setpoint) {
+    nextSetpoint = setpoint;
+  }
+
   /* Set the Elevator Target enum, for set extension method to move the elevator */
   public Command setTarget(ElevatorSetpoint height) {
-    return Commands.runOnce(() -> nextSetpoint = height);
+    return Commands.runOnce(() -> this.selectFutureTarget(height));
   }
 
   public Command setExtension() {
@@ -137,6 +141,11 @@ public class Elevator extends SubsystemBase {
     return setpoint;
   }
 
+  @AutoLogOutput(key = "DEBUG")
+  public ElevatorSetpoint getNextExpectedSetpoint() {
+    return nextSetpoint;
+  }
+
   public boolean atSetpoint() {
     return inputs.atSetpoint;
   }
@@ -146,7 +155,6 @@ public class Elevator extends SubsystemBase {
     Logger.processInputs("Elevator", inputs);
     io.updateInputs(inputs);
     Logger.recordOutput("Elevator/TargetHeight", inputs.targetHeight);
-    Logger.recordOutput("Elevator/TalonSetpoint", getSetpoint().height);
     inputs.atSetpoint = Math.abs(inputs.targetHeight - inputs.position) <= tolerance;
     this.setPosition(getSetpoint().height);
   }

@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,11 +21,17 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoint;
 import frc.robot.util.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoAlign extends SubsystemBase {
+
+  public static Pose2d FINAL_CORAL_POSE;
+  public static Pose2d FINAL_ALGAE_POSE;
+  public static Pose2d FINAL_CAGE_POSE;
+  public static double L4_BACK_DISTANCE = 2.5; //INCHS
 
   private PIDController xPID =
       new PIDController(xP.getAsDouble(), xI.getAsDouble(), xD.getAsDouble());
@@ -46,31 +53,40 @@ public class AutoAlign extends SubsystemBase {
     zPID.setTolerance(0.01);
   }
 
-  public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, ElevatorSetpoint setpoints) {
-    Pose2d target =
-        leftOrNot ? drive.getPose().nearest(leftPersPose) : drive.getPose().nearest(rightPersPose);
-    if (setpoints == ElevatorSetpoint.L4) {
-      Transform2d relativeTransform =
-          new Transform2d(new Translation2d(0.0, -0.5), new Rotation2d());
-      target = drive.getPose().plus(relativeTransform);
-      Logger.recordOutput("AutoAlign/L4Pose", true);
-    }
-    Logger.recordOutput("AutoAlign/L4Pose", false);
-
-    Pose2d finalTarget = target;
-    return Commands.run(
+  public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, Elevator elevator) {
+    return Commands.startRun(
             () -> {
-              Logger.recordOutput("AutoAlign/TargetPose", finalTarget);
+              Pose2d target =
+                  leftOrNot
+                      ? drive.getPose().nearest(leftPersPose)
+                      : drive.getPose().nearest(rightPersPose);
+
+              if (elevator.getNextExpectedSetpoint() == ElevatorSetpoint.L4) {
+                Logger.recordOutput("AutoAlign/HasL4", true);
+
+                double backMeters = -Units.inchesToMeters(L4_BACK_DISTANCE); // negative = backwards
+                Transform2d backwardsTransform =
+                    new Transform2d(new Translation2d(backMeters, 0.0), new Rotation2d());
+
+                target = target.plus(backwardsTransform);
+              } else {
+                Logger.recordOutput("AutoAlign/HasL4", false);
+              }
+
+              FINAL_CORAL_POSE = target;
+            },
+            () -> {
+              Logger.recordOutput("AutoAlign/TargetPose", FINAL_CORAL_POSE);
               Logger.recordOutput("AutoAlign/xPID", xPID.getError());
               Logger.recordOutput("AutoAlign/yPID", yPID.getError());
 
               ChassisSpeeds driveToPoseSpeeds =
                   new ChassisSpeeds(
-                      xPID.calculate(drive.getPose().getX(), finalTarget.getX()),
-                      yPID.calculate(drive.getPose().getY(), finalTarget.getY()),
+                      xPID.calculate(drive.getPose().getX(), FINAL_CORAL_POSE.getX()),
+                      yPID.calculate(drive.getPose().getY(), FINAL_CORAL_POSE.getY()),
                       zPID.calculate(
                           drive.getRotation().getRadians(),
-                          finalTarget.getRotation().getRadians()));
+                          FINAL_CORAL_POSE.getRotation().getRadians()));
 
               // Set Chassis Speeds
               boolean isFlipped =
@@ -92,24 +108,27 @@ public class AutoAlign extends SubsystemBase {
               yPID.reset();
               zPID.reset(drive.getRotation().getRadians());
             })
-        .until(() -> AutoAlign.isNear(finalTarget, drive.getPose()))
-        .finallyDo(() -> drive.stop());
+        .until(() -> AutoAlign.isNear(FINAL_CORAL_POSE, drive.getPose()))
+        .finallyDo(() -> drive.stopWithX());
   }
 
   public Command driveToAlgaePose(Drive drive) {
-    Pose2d target = drive.getPose().nearest(algaePose);
-    return Commands.run(
+    return Commands.startRun(
             () -> {
-              Logger.recordOutput("AutoAlign/TargetPose", target);
+              FINAL_ALGAE_POSE = drive.getPose().nearest(algaePose);
+            },
+            () -> {
+              Logger.recordOutput("AutoAlign/TargetPose", FINAL_ALGAE_POSE);
               Logger.recordOutput("AutoAlign/xPID", xPID.getError());
               Logger.recordOutput("AutoAlign/yPID", yPID.getError());
 
               ChassisSpeeds driveToPoseSpeeds =
                   new ChassisSpeeds(
-                      xPID.calculate(drive.getPose().getX(), target.getX()),
-                      yPID.calculate(drive.getPose().getY(), target.getY()),
+                      xPID.calculate(drive.getPose().getX(), FINAL_ALGAE_POSE.getX()),
+                      yPID.calculate(drive.getPose().getY(), FINAL_ALGAE_POSE.getY()),
                       zPID.calculate(
-                          drive.getRotation().getRadians(), target.getRotation().getRadians()));
+                          drive.getRotation().getRadians(),
+                          FINAL_ALGAE_POSE.getRotation().getRadians()));
 
               // Set Chassis Speeds
               boolean isFlipped =
@@ -131,8 +150,8 @@ public class AutoAlign extends SubsystemBase {
               yPID.reset();
               zPID.reset(drive.getRotation().getRadians());
             })
-        .until(() -> AutoAlign.isNear(target, drive.getPose()))
-        .finallyDo(() -> drive.stop());
+        .until(() -> AutoAlign.isNear(FINAL_ALGAE_POSE, drive.getPose()))
+        .finallyDo(() -> drive.stopWithX());
   }
 
   public Command driveToPreSelectedPose(Drive drive, Pose2d pose) {
@@ -174,19 +193,22 @@ public class AutoAlign extends SubsystemBase {
   }
 
   public Command driveToCage(Drive drive) {
-    Pose2d pose = drive.getPose().nearest(cagePoses);
-    return Commands.run(
+    return Commands.startRun(
             () -> {
-              Logger.recordOutput("AutoAlign/ClimbPose", pose);
+              FINAL_CAGE_POSE = drive.getPose().nearest(cagePoses);
+            },
+            () -> {
+              Logger.recordOutput("AutoAlign/ClimbPose", FINAL_CAGE_POSE);
               Logger.recordOutput("AutoAlign/xPID", xPID.getError());
               Logger.recordOutput("AutoAlign/yPID", yPID.getError());
 
               ChassisSpeeds driveToPoseSpeeds =
                   new ChassisSpeeds(
-                      xPID.calculate(drive.getPose().getX(), pose.getX()),
-                      yPID.calculate(drive.getPose().getY(), pose.getY()),
+                      xPID.calculate(drive.getPose().getX(), FINAL_CAGE_POSE.getX()),
+                      yPID.calculate(drive.getPose().getY(), FINAL_CAGE_POSE.getY()),
                       zPID.calculate(
-                          drive.getRotation().getRadians(), pose.getRotation().getRadians()));
+                          drive.getRotation().getRadians(),
+                          FINAL_CAGE_POSE.getRotation().getRadians()));
 
               // Set Chassis Speeds
               boolean isFlipped =
@@ -208,11 +230,12 @@ public class AutoAlign extends SubsystemBase {
               yPID.reset();
               zPID.reset(drive.getRotation().getRadians());
             })
-        .until(() -> AutoAlign.isNear(pose, drive.getPose()))
-        .finallyDo(() -> drive.stop());
+        .until(() -> AutoAlign.isNear(FINAL_CAGE_POSE, drive.getPose()))
+        .finallyDo(() -> drive.stopWithX());
   }
 
   // Experimental Auto Aligning using Vision
+  // DEBUGGING NOT OFFICIAL USE
   public Command visionAutoAlign(Drive drive) {
     return Commands.run(
             () -> {
