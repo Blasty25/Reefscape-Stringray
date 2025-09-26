@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveCommands;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoint;
 import frc.robot.util.AllianceFlipUtil;
@@ -48,9 +48,9 @@ public class AutoAlign extends SubsystemBase {
   public AutoAlign() {
     setupAutoAlignment();
     zPID.enableContinuousInput(-Math.PI, Math.PI);
-    xPID.setTolerance(0.01);
-    yPID.setTolerance(0.01);
-    zPID.setTolerance(0.01);
+    xPID.setTolerance(0.03);
+    yPID.setTolerance(0.03);
+    zPID.setTolerance(0.03);
   }
 
   public Command driveToAlignWithReef(Drive drive, boolean leftOrNot, Elevator elevator) {

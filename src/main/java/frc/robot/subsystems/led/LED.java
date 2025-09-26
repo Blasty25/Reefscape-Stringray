@@ -15,16 +15,13 @@ public class LED extends SubsystemBase {
   private final LEDIO io;
   private final LEDIOInputsAutoLogged inputs = new LEDIOInputsAutoLogged();
 
-  RobotState state = RobotState.Idle;
-
   private Color color;
   private Animation disabledAnimation;
+  private RobotState state = RobotState.Idle;
 
-  private Animation animation;
 
   public LED(LEDIO io) {
     this.io = io;
-
     color =
         DriverStation.getAlliance()
             .map(alliance -> alliance == Alliance.Red ? Color.kDarkRed : Color.kNavy)
@@ -38,13 +35,18 @@ public class LED extends SubsystemBase {
             0,
             LEDConstants.length);
     io.set(disabledAnimation);
-    animation = disabledAnimation;
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("LED", inputs);
+
+    if (DriverStation.isEnabled()) {
+      io.set(LEDConstants.animMap.get(state));
+    } else {
+      io.set(LEDConstants.disabledAnim);
+    }
   }
 
   private void setIndex(int i, Color color) {
@@ -106,50 +108,12 @@ public class LED extends SubsystemBase {
       setIndex(i, new Color(red, green, blue));
     }
   }
-
-  public Command set(Animation animation) {
+  
+  public Command setState(RobotState kState) {
     return this.run(
         () -> {
-          io.set(animation);
+          this.state = kState;
         });
   }
 
-  public Command setState(RobotState state) {
-    return this.run(
-        () -> {
-          switch (state) {
-            case Idle:
-              wave(Color.kBlue, Color.kYellow, 20, 3);
-              // LEDConstants.flowAnimation(io, this);
-            case Manual_Score:
-              animation = LEDConstants.manualScoreAnimation;
-              break;
-            case SetElevatorSetpoint:
-              animation = LEDConstants.setElevatorAnimation;
-              break;
-            case Shoot:
-              animation = LEDConstants.shootCoralAnimation;
-              break;
-            case PreAlgae:
-              animation = LEDConstants.algaeReadyAnimation;
-              break;
-            case ClimbPull:
-              animation = LEDConstants.climbReadyAnimation;
-              break;
-            case ClimbReady:
-              if (DriverStation.isDisabled()) {
-                animation = LEDConstants.climbedAnimation;
-              } else {
-                animation = LEDConstants.endAnimation;
-              }
-              break;
-            case AlgaeArmed:
-            case AlgaeIntake:
-            default:
-              LEDConstants.flowAnimation(io, this);
-              break;
-          }
-          io.set(animation);
-        });
-  }
 }

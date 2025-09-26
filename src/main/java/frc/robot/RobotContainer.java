@@ -21,13 +21,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.autoAlign.AutoAlign;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveCommands;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
@@ -93,8 +93,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(leftCam, robotToLeftCam),
-                new VisionIOPhotonVision(rightCam, robotToRightCam));
+                new VisionIOPhotonVision(leftCam, robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(rightCam, robotToRightCam, drive::getRotation));
 
         // outtake = new Outtake(new OuttakeIOTalonFX());
         outtake = new Outtake(new OuttakeIO() {});

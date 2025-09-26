@@ -2,8 +2,6 @@ package frc.robot.subsystems.led;
 
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
-import com.ctre.phoenix.led.CANdle.LEDStripType;
-import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import edu.wpi.first.wpilibj.util.Color;
 
@@ -11,14 +9,15 @@ public class LEDIOCandle implements LEDIO {
   private final CANdle candle;
   private final CANdleConfiguration config = new CANdleConfiguration();
 
+  private Animation currentAnimation = LEDConstants.disabledAnim;
+
   public LEDIOCandle() {
     candle = new CANdle(LEDConstants.candleId, "rio");
 
-    config.statusLedOffWhenActive = true;
+    config.brightnessScalar = 0.5;
     config.disableWhenLOS = false;
-    config.stripType = LEDStripType.GRB;
-    config.brightnessScalar = LEDConstants.brightness;
-    config.vBatOutputMode = VBatOutputMode.Modulated;
+    config.enableOptimizations = true;
+
     candle.configAllSettings(config);
   }
 
@@ -47,6 +46,9 @@ public class LEDIOCandle implements LEDIO {
 
   @Override
   public void set(Animation animation) {
-    candle.animate(animation);
+    if (currentAnimation != animation) {
+      candle.animate(animation);
+      currentAnimation = animation;
+    }
   }
 }
