@@ -41,8 +41,8 @@ public class HopperIOTalonFX implements HopperIO {
     talon = new TalonFX(hopperTalon, "rio");
     config.MotorOutput.Inverted =
         HopperConstants.inverted
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+            ? InvertedValue.CounterClockwise_Positive
+            : InvertedValue.Clockwise_Positive;
     config.CurrentLimits.SupplyCurrentLimit = HopperConstants.current;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLowerLimit = HopperConstants.currentLower;

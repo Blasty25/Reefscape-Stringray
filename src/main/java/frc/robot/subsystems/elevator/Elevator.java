@@ -44,7 +44,7 @@ public class Elevator extends SubsystemBase {
 
     routine =
         new SysIdRoutine(
-            new Config(null, null, null),
+            new Config(null, Volts.of(4), null),
             new Mechanism(
                 (volts) -> io.setVolts(volts.in(Volts)),
                 log -> {
@@ -72,11 +72,6 @@ public class Elevator extends SubsystemBase {
   /* Set Position to ... */
   public void setPosition(double position) {
     io.setControl(position);
-  }
-
-  public Command l1Flick(ElevatorSetpoint flickSetpoint) {
-
-    return Commands.runOnce(() -> this.setpoint = flickSetpoint, this);
   }
 
   /* Reset Encoder with a position value of 0 */
@@ -141,7 +136,6 @@ public class Elevator extends SubsystemBase {
     return setpoint;
   }
 
-  @AutoLogOutput(key = "DEBUG")
   public ElevatorSetpoint getNextExpectedSetpoint() {
     return nextSetpoint;
   }

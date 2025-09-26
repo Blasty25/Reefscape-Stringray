@@ -182,13 +182,17 @@ public class StateMachine extends SubsystemBase {
             Commands.sequence(elevator.setTarget(ElevatorSetpoint.L1), elevator.setExtension()));
 
     // Shoot trigger when elevator setpoint active
+    // James L1 Flick command
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
         .and(driver.rightTrigger())
         .onTrue(
             Commands.sequence(
-                elevator.l1Flick(ElevatorSetpoint.L1Flick),
+                elevator.setTarget(ElevatorSetpoint.L1Flick),
+                elevator.setExtension(),
                 outtake.shoot(),
+                elevator.setTarget(ElevatorSetpoint.INTAKE),
+                elevator.setExtension(),
                 Commands.waitSeconds(0.1),
                 forceState(RobotState.Idle)));
 
