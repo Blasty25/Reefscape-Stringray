@@ -130,8 +130,8 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Idle)
         .and(() -> outtake.isDetected())
-        .onTrue(forceState(RobotState.SetElevatorSetpoint))
-        .onFalse(forceState(RobotState.Idle));
+        .onTrue(Commands.parallel(hopper.stopHopper(), forceState(RobotState.SetElevatorSetpoint)))
+        .onFalse(Commands.parallel(hopper.stopHopper(), forceState(RobotState.Idle)));
 
     // Algae armed state if gripper detects dual
     stateTriggers
@@ -172,7 +172,7 @@ public class StateMachine extends SubsystemBase {
         .get(RobotState.Idle)
         .onTrue(
             Commands.sequence(
-                elevator.setTarget(ElevatorSetpoint.INTAKE), elevator.setExtension()));
+                elevator.setTarget(ElevatorSetpoint.INTAKE), elevator.setExtension(), hopper.stopHopper()));
 
     stateTriggers
         .get(RobotState.SetElevatorSetpoint)
@@ -261,7 +261,7 @@ public class StateMachine extends SubsystemBase {
             Commands.sequence(
                 elevator.setExtension(),
                 Commands.waitSeconds(1),
-                Commands.waitUntil(()-> elevator.atSetpoint()),
+                Commands.waitUntil(() -> elevator.atSetpoint()),
                 outtake.shoot(),
                 Commands.waitSeconds(0.1)));
 
@@ -417,7 +417,6 @@ public class StateMachine extends SubsystemBase {
         .and(driver.povLeft())
         .onTrue(forceState(RobotState.Idle));
 
-    // Robot is Intaking Algae using LT, Cancel Request is RT
     stateTriggers
         .get(RobotState.AlgaeIntake)
         .and(driver.povLeft())

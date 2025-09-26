@@ -19,7 +19,7 @@ public interface OuttakeIO {
     public double rawMeasurement = 0.0;
 
     public boolean motorConnected = false;
-    public boolean laserCanConnected = false;
+    public boolean canAndColorConnected = false;
 
     public boolean motorStalled = false;
 

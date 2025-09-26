@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.outtake;
 
-import static frc.robot.subsystems.elevator.ElevatorConstants.statorCurrent;
 import static frc.robot.subsystems.outtake.OuttakeConstants.rangingMode;
 import static frc.robot.subsystems.outtake.OuttakeConstants.regionOfInterest;
 import static frc.robot.util.PhoenixUtil.*;
@@ -22,6 +21,10 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.reduxrobotics.sensors.canandcolor.Canandcolor;
+import com.reduxrobotics.sensors.canandcolor.CanandcolorSettings;
+import com.reduxrobotics.sensors.canandcolor.ProximityPeriod;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -33,7 +36,8 @@ import frc.robot.util.RobotMap.OuttakeMap;
 public class OuttakeIOTalonFX implements OuttakeIO {
   private final TalonFX talon;
   private final TalonFXConfiguration config = new TalonFXConfiguration();
-  private final LaserCan can;
+  private final Canandcolor can;
+  private final CanandcolorSettings settings;
   private final StatusSignal<AngularVelocity> velocity;
   private final StatusSignal<Voltage> voltage;
   private final StatusSignal<Current> statorCurrent;
@@ -52,7 +56,16 @@ public class OuttakeIOTalonFX implements OuttakeIO {
 
   public OuttakeIOTalonFX() {
     talon = new TalonFX(OuttakeMap.outtakeID, "rio");
-    can = new LaserCan(OuttakeMap.canandcolorID);
+    can = new Canandcolor(OuttakeMap.canandcolorID);
+    can.resetFactoryDefaults();
+
+    settings = can.getSettings();
+
+    settings.setProximityIntegrationPeriod(ProximityPeriod.k5ms);
+    settings.setAlignProximityFramesToIntegrationPeriod(true);
+
+    can.setSettings(settings);
+
     config.MotorOutput.Inverted =
         OuttakeConstants.inverted
             ? InvertedValue.Clockwise_Positive
@@ -76,15 +89,6 @@ public class OuttakeIOTalonFX implements OuttakeIO {
                 50.0, position, velocity, voltage, supplyCurrent, statorCurrent, temperature));
 
     talon.optimizeBusUtilization();
-
-    // setting up laser can
-    try {
-      can.setRangingMode(rangingMode);
-      can.setTimingBudget(TimingBudget.TIMING_BUDGET_33MS);
-      can.setRegionOfInterest(regionOfInterest);
-    } catch (ConfigurationFailedException e) {
-      e.printStackTrace();
-    }
   }
 
   @Override
@@ -100,12 +104,10 @@ public class OuttakeIOTalonFX implements OuttakeIO {
     inputs.motorVoltage = voltage.getValueAsDouble();
     inputs.motorStalled = (inputs.statorCurrent > 30) && (inputs.velocityRadPerSec <= 100);
 
-    LaserCan.Measurement measurement = can.getMeasurement();
-    inputs.laserCanConnected = (measurement != null);
+    inputs.rawMeasurement = can.getProximity();
+    inputs.canAndColorConnected = can.isConnected();
 
-    inputs.isCorralDetected =
-        (measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
-            && (measurement.distance_mm <= 20.0);
+    inputs.isCorralDetected = can.getProximity() <= 0.15; // Closer to 0 the closer the object is
   }
 
   /* Value from -1 to 1 */
@@ -121,7 +123,7 @@ public class OuttakeIOTalonFX implements OuttakeIO {
 
   @Override
   public void intake() {
-    talon.setControl(percentOut.withOutput(1)); // intake full speed
+    talon.setControl(voltageOut.withOutput(5.0)); // intake full speed
   }
 
   @Override

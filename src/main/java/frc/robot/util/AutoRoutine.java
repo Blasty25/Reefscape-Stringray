@@ -37,6 +37,19 @@ public class AutoRoutine extends SubsystemBase {
     this.led = led;
   }
 
+  public Command oneL4CoralLeftSide() {
+    return Commands.sequence(
+        autoAlign.driveToPreSelectedPose(
+            drive, new Pose2d(5.06, 5.35, Rotation2d.fromDegrees(-124.05))),
+        elevator.setTarget(ElevatorSetpoint.L4),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        Commands.waitSeconds(0.5),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension());
+  }
+
   public Command autoCoralL4LeftSide() {
     return Commands.sequence(
         autoAlign.driveToPreSelectedPose(

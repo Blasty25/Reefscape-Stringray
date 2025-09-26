@@ -65,7 +65,7 @@ public class Hopper extends SubsystemBase {
   public Command intake() {
     return Commands.run(
         () -> {
-          this.setTrackPercent(1.0);
+          this.setVoltage(3.0);
         },
         this);
   }

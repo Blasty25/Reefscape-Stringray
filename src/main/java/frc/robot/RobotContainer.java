@@ -53,7 +53,6 @@ import frc.robot.subsystems.led.LEDIOSim;
 import frc.robot.subsystems.outtake.Outtake;
 import frc.robot.subsystems.outtake.OuttakeIO;
 import frc.robot.subsystems.outtake.OuttakeIOSim;
-import frc.robot.subsystems.outtake.OuttakeIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -97,7 +96,9 @@ public class RobotContainer {
                 new VisionIOPhotonVision(leftCam, robotToLeftCam),
                 new VisionIOPhotonVision(rightCam, robotToRightCam));
 
-        outtake = new Outtake(new OuttakeIOTalonFX());
+        // outtake = new Outtake(new OuttakeIOTalonFX());
+        outtake = new Outtake(new OuttakeIO() {});
+
         hopper = new Hopper(new HopperIOTalonFX());
         elevator = new Elevator(new ElevatorIOTalonFX());
         gripper = new Gripper(new GripperIOTalonFX());
@@ -173,8 +174,9 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("Home Elevator & Reset Encoder", elevator.homeElevator());
     autoChooser.addOption("Climb Encoder Reset", climb.resetEncoder());
-    autoChooser.addOption("Elevator Tuner", elevator.sysId());
-    autoChooser.addDefaultOption("Left Side Auto Routine Coral", autoRoutine.autoCoralL4LeftSide());
+    autoChooser.addDefaultOption("Elevator Tuner", elevator.sysId());
+    autoChooser.addOption("Left Side Auto Routine Coral", autoRoutine.autoCoralL4LeftSide());
+    autoChooser.addOption("1 L4 Auto Left Side", autoRoutine.oneL4CoralLeftSide());
 
     // Resetting the Climb Encoder
     climb.resetEncoder();

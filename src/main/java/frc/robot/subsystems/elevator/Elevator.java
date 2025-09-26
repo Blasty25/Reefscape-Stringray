@@ -50,7 +50,7 @@ public class Elevator extends SubsystemBase {
                 log -> {
                   log.motor("left")
                       .voltage(Volts.of(inputs.leftVolts))
-                      .current(Amps.of(inputs.leftCurrent))
+                      .current(Amps.of(inputs.leftSupplyCurrent))
                       .linearPosition(Meters.of(inputs.position))
                       .linearVelocity(MetersPerSecond.of(inputs.velocity));
                 },

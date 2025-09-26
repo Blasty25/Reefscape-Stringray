@@ -17,8 +17,11 @@ public interface ElevatorIO {
     public double leftVolts = 0.0;
     public double rightVolts = 0.0;
 
-    public double leftCurrent = 0.0;
-    public double rightCurrent = 0.0;
+    public double leftStatorCurrent = 0.0;
+    public double rightStatorCurrent = 0.0;
+
+    public double leftSupplyCurrent = 0.0;
+    public double rightSupplyCurrent = 0.0;
 
     public double leftTemp = 0.0;
     public double rightTemp = 0.0;

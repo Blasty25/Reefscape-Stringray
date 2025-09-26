@@ -46,12 +46,12 @@ public class Outtake extends SubsystemBase {
   public Command shoot() {
     return Commands.run(
             () -> {
-              io.setPercent(1.0);
+              io.setVoltage(5.0);
               io.setSimState(false);
             },
             this)
         .until(() -> !inputs.isCorralDetected)
-        .finallyDo(() -> setPercentOutput(0.0));
+        .finallyDo(() -> io.setVoltage(5.0));
   }
 
   public Command setSimState(boolean state) {
