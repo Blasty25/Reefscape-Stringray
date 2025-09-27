@@ -49,7 +49,7 @@ public class Hopper extends SubsystemBase {
     return Commands.run(
             () -> {
               outtake.setOuttakeVolts(outtakeIntakeVolts);
-              this.setVoltage(hopperVolts);
+              io.setTrackPercent(hopperVolts);
             },
             this)
         .until(() -> outtake.isDetected())
@@ -57,6 +57,7 @@ public class Hopper extends SubsystemBase {
             () -> {
               StateHandlerConstants.rumble(0.8, 0.5).schedule();
               this.setVoltage(0.0);
+              io.stop();
               outtake.stop();
             });
   }

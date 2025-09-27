@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1;
+  private static final double DEADBAND = 0.15;
   private static final double ANGLE_KP = 5.0;
   private static final double ANGLE_KD = 0.4;
   public static final double ANGLE_MAX_VELOCITY = 8.0;
@@ -100,7 +100,7 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped
-                      ? drive.getRotation().plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation()));
         },
         drive);

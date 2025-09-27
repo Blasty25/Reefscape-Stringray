@@ -7,7 +7,7 @@ import com.reduxrobotics.sensors.canandcolor.ProximityPeriod;
 public class OuttakeConstants {
 
   public static final int current = 60;
-  public static final boolean inverted = false;
+  public static final boolean inverted = true;
 
   public static final int canandcolor = 21;
   public static final double proximityThreshold = 0.15;

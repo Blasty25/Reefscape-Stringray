@@ -23,7 +23,7 @@ public class ElevatorConstants {
   public static final DCMotor gearbox = DCMotor.getKrakenX60(2);
 
   public enum ElevatorSetpoint {
-    INTAKE(0.014), // 0.006 if its not at the right height
+    INTAKE(0.0), // 0.006 if its not at the right height
     L1(0.42),
     L1Flick(0.52),
     L2(0.79),

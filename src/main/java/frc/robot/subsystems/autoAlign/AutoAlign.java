@@ -22,7 +22,6 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveCommands;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorSetpoint;
-import frc.robot.util.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoAlign extends SubsystemBase {
@@ -98,9 +97,7 @@ public class AutoAlign extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive)
@@ -140,9 +137,7 @@ public class AutoAlign extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive)
@@ -178,9 +173,7 @@ public class AutoAlign extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive)
@@ -220,9 +213,7 @@ public class AutoAlign extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive)
@@ -275,9 +266,7 @@ public class AutoAlign extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive)
@@ -332,9 +321,7 @@ public class AutoAlign extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       driveToPoseSpeeds,
                       isFlipped
-                          ? drive
-                              .getRotation()
-                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive)

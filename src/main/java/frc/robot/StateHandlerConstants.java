@@ -29,6 +29,6 @@ public class StateHandlerConstants {
         .raceWith(Commands.waitSeconds(time));
   }
 
-  public static final double HOPPER_INTAKE_VOLTAGE = 3.5;
-  public static final double OUTTAKE_INTAKE_VOLTAGE = 5.0;
+  public static final double HOPPER_INTAKE_VOLTAGE = 0.3;
+  public static final double OUTTAKE_INTAKE_VOLTAGE = -12.0;
 }

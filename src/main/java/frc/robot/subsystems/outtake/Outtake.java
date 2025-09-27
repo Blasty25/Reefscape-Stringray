@@ -72,7 +72,7 @@ public class Outtake extends SubsystemBase {
         .finallyDo(() -> io.stop());
   }
 
-  public void setOuttakeVolts(double volts){
+  public void setOuttakeVolts(double volts) {
     io.intake(volts);
   }
 

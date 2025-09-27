@@ -166,6 +166,10 @@ public class StateMachine extends SubsystemBase {
         .whileTrue(
             Commands.parallel(
                 hopper.overideVoltage(-6), outtake.ejectCorral(), forceState(RobotState.Idle)));
+    stateTriggers
+        .get(RobotState.SetElevatorSetpoint)
+        .and(operatorOveride.povRight())
+        .onTrue(forceState(RobotState.Manual_Score));
 
     // Elevator setpoint sequences
     stateTriggers
@@ -200,7 +204,7 @@ public class StateMachine extends SubsystemBase {
     stateTriggers
         .get(RobotState.Idle)
         .and(stateRequests.get(RobotState.Intake))
-        .onTrue(
+        .whileTrue(
             Commands.parallel(
                 hopper.autoIntake(
                     outtake,

@@ -49,11 +49,11 @@ import frc.robot.subsystems.hopper.HopperIOSim;
 import frc.robot.subsystems.hopper.HopperIOTalonFX;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LEDIO;
-import frc.robot.subsystems.led.LEDIOCandle;
 import frc.robot.subsystems.led.LEDIOSim;
 import frc.robot.subsystems.outtake.Outtake;
 import frc.robot.subsystems.outtake.OuttakeIO;
 import frc.robot.subsystems.outtake.OuttakeIOSim;
+import frc.robot.subsystems.outtake.OuttakeIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -95,17 +95,15 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(leftCam, robotToLeftCam),
-                new VisionIOPhotonVision(rightCam, robotToRightCam));
+                new VisionIOPhotonVision(camLeft, robotToLeftCam, drive::getRotation),
+                new VisionIOPhotonVision(camRight, robotToRightCam, drive::getRotation));
 
-        // outtake = new Outtake(new OuttakeIOTalonFX());
-        outtake = new Outtake(new OuttakeIO() {});
-
+        outtake = new Outtake(new OuttakeIOTalonFX());
         hopper = new Hopper(new HopperIOTalonFX());
         elevator = new Elevator(new ElevatorIOTalonFX());
         gripper = new Gripper(new GripperIOTalonFX());
         climb = new Climb(new ClimbIOTalonFX());
-        led = new LED(new LEDIOCandle());
+        led = new LED(new LEDIO() {});
         break;
 
       case SIM:
@@ -121,8 +119,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(leftCam, robotToLeftCam, drive::getPose),
-                new VisionIOPhotonVisionSim(rightCam, robotToRightCam, drive::getPose));
+                new VisionIOPhotonVisionSim(camLeft, robotToLeftCam, drive::getPose),
+                new VisionIOPhotonVisionSim(camRight, robotToRightCam, drive::getPose));
 
         outtake = new Outtake(new OuttakeIOSim());
         hopper = new Hopper(new HopperIOSim());

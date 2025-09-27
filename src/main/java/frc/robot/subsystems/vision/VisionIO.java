@@ -25,6 +25,7 @@ public interface VisionIO {
         new TargetObservation(new Rotation2d(), new Rotation2d());
     public PoseObservation[] poseObservations = new PoseObservation[0];
     public int[] tagIds = new int[0];
+    public int bestReefTagId = 0;
   }
 
   /** Represents the angle to a simple target, not used for pose estimation. */
@@ -40,9 +41,8 @@ public interface VisionIO {
       PoseObservationType type) {}
 
   public static enum PoseObservationType {
-    MEGATAG_1,
-    MEGATAG_2,
-    PHOTONVISION
+    PHOTONVISION_SINGLE,
+    PHOTONVISION_MULTITAG
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}
