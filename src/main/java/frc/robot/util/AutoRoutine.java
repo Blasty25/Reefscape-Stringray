@@ -18,103 +18,106 @@ import frc.robot.subsystems.outtake.Outtake;
 
 public class AutoRoutine extends SubsystemBase {
 
-    private Drive drive;
-    private AutoAlign autoAlign;
-    private Hopper hopper;
-    private Outtake outtake;
-    private Elevator elevator;
-    private LED led;
+  private Drive drive;
+  private AutoAlign autoAlign;
+  private Hopper hopper;
+  private Outtake outtake;
+  private Elevator elevator;
+  private LED led;
 
-    public AutoRoutine(
-            Drive drive,
-            AutoAlign autoAlign,
-            Hopper hopper,
-            Outtake outtake,
-            Elevator elevator,
-            LED led) {
-        this.drive = drive;
-        this.autoAlign = autoAlign;
-        this.hopper = hopper;
-        this.outtake = outtake;
-        this.elevator = elevator;
-        this.led = led;
-    }
+  public AutoRoutine(
+      Drive drive,
+      AutoAlign autoAlign,
+      Hopper hopper,
+      Outtake outtake,
+      Elevator elevator,
+      LED led) {
+    this.drive = drive;
+    this.autoAlign = autoAlign;
+    this.hopper = hopper;
+    this.outtake = outtake;
+    this.elevator = elevator;
+    this.led = led;
+  }
 
-    public Command oneL4CoralLeftSide() {
-        return Commands.sequence(
-                autoAlign.visionAutoAlignLeft(drive, elevator),
-                elevator.setTarget(ElevatorSetpoint.L4),
-                elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
-                outtake.shoot(),
-                Commands.waitSeconds(0.5),
-                elevator.setTarget(ElevatorSetpoint.INTAKE),
-                elevator.setExtension());
-    }
+  public Command oneL4CoralLeftSide() {
+    return Commands.sequence(
+        autoAlign.visionAutoAlignLeft(drive, elevator),
+        elevator.setTarget(ElevatorSetpoint.L4),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        Commands.waitSeconds(0.5),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension());
+  }
 
-    public Command autoCoralL4LeftSide() {
-        return Commands.sequence(
-                elevator.setTarget(ElevatorSetpoint.L4),
-                autoAlign.visionAutoAlignLeft(drive, elevator),
-                elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
-                outtake.shoot(),
-                elevator.setTarget(ElevatorSetpoint.INTAKE),
-                elevator.setExtension(),
-                autoAlign.driveToPreSelectedPose(
-                        drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
-                hopper.autoIntake(
-                        outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
-                elevator.setTarget(ElevatorSetpoint.L4),
-                autoAlign.visionAutoAlignLeft(drive, elevator),
-                elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
-                outtake.shoot(),
-                elevator.setTarget(ElevatorSetpoint.INTAKE),
-                elevator.setExtension(),
-                autoAlign.driveToPreSelectedPose(
-                        drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
-                hopper.autoIntake(
-                        outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
-                elevator.setTarget(ElevatorSetpoint.L4),
-                autoAlign.visionAutoAlignRight(drive, elevator),
-                elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
-                outtake.shoot(),
-                elevator.setTarget(ElevatorSetpoint.INTAKE),
-                elevator.setExtension(),
-                autoAlign.driveToPreSelectedPose(
-                        drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
-                hopper.autoIntake(
-                        outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
-                elevator.setTarget(ElevatorSetpoint.L4), // Can't Use Vision Auto Align due to it will just go to the same old pose as before
-                autoAlign.driveToPreSelectedPose(drive, new Pose2d(3.13, 4.19, new Rotation2d())),
-                elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
-                outtake.shoot(),
-                elevator.setTarget(ElevatorSetpoint.INTAKE),
-                elevator.setExtension(),
-                autoAlign.driveToPreSelectedPose(
-                        drive, new Pose2d(1.25, 0.89, Rotation2d.fromDegrees(49.73))),
-                hopper.autoIntake(
-                        outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
-                autoAlign.driveToPreSelectedPose(
-                        drive, new Pose2d(3.78, 2.83, Rotation2d.fromDegrees(55.8))),
-                elevator.setTarget(ElevatorSetpoint.L4),
-                elevator.setExtension(),
-                Commands.waitUntil(() -> elevator.atSetpoint()),
-                outtake.shoot(),
-                elevator.setTarget(ElevatorSetpoint.INTAKE),
-                elevator.setExtension());
-    }
+  public Command autoCoralL4LeftSide() {
+    return Commands.sequence(
+        elevator.setTarget(ElevatorSetpoint.L4),
+        autoAlign.visionAutoAlignLeft(drive, elevator),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension(),
+        autoAlign.driveToPreSelectedPose(
+            drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
+        hopper.autoIntake(
+            outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
+        elevator.setTarget(ElevatorSetpoint.L4),
+        autoAlign.visionAutoAlignLeft(drive, elevator),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension(),
+        autoAlign.driveToPreSelectedPose(
+            drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
+        hopper.autoIntake(
+            outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
+        elevator.setTarget(ElevatorSetpoint.L4),
+        autoAlign.visionAutoAlignRight(drive, elevator),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension(),
+        autoAlign.driveToPreSelectedPose(
+            drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
+        hopper.autoIntake(
+            outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
+        elevator.setTarget(
+            ElevatorSetpoint
+                .L4), // Can't Use Vision Auto Align due to it will just go to the same old pose as
+        // before
+        autoAlign.driveToPreSelectedPose(drive, new Pose2d(3.13, 4.19, new Rotation2d())),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension(),
+        autoAlign.driveToPreSelectedPose(
+            drive, new Pose2d(1.25, 0.89, Rotation2d.fromDegrees(49.73))),
+        hopper.autoIntake(
+            outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
+        autoAlign.driveToPreSelectedPose(
+            drive, new Pose2d(3.78, 2.83, Rotation2d.fromDegrees(55.8))),
+        elevator.setTarget(ElevatorSetpoint.L4),
+        elevator.setExtension(),
+        Commands.waitUntil(() -> elevator.atSetpoint()),
+        outtake.shoot(),
+        elevator.setTarget(ElevatorSetpoint.INTAKE),
+        elevator.setExtension());
+  }
 
-    /*
-     * 1st Pose 5.06, 5.35, Rotation(-124.05)
-     * 2nd Pose 1.16, 6.96 Rotation(-57.77)
-     * 3rd Pose 3.88, 5.28, Rotation(-60.47)
-     * 4th Pose 1.16, 6.96, Rotation(-57.77)
-     * 5th Pose 3.61, 5.07, Rotation(-59.06)
-     * 6th Pose 1.16, 6.96, Rotation(-57.77)
-     * 7th Pose 3.13, 4.19, Rotation(0.14)
-     */
+  /*
+   * 1st Pose 5.06, 5.35, Rotation(-124.05)
+   * 2nd Pose 1.16, 6.96 Rotation(-57.77)
+   * 3rd Pose 3.88, 5.28, Rotation(-60.47)
+   * 4th Pose 1.16, 6.96, Rotation(-57.77)
+   * 5th Pose 3.61, 5.07, Rotation(-59.06)
+   * 6th Pose 1.16, 6.96, Rotation(-57.77)
+   * 7th Pose 3.13, 4.19, Rotation(0.14)
+   */
 }

@@ -214,8 +214,9 @@ public class RobotContainer {
     controller
         .x()
         .onTrue(
-            PoseUtils.getOffsets(()->
-                drive.getPose().nearest(AutoAlignConstants.offsetList),()-> drive.getPose()));
+            PoseUtils.getOffsets(
+                () -> drive.getPose().nearest(AutoAlignConstants.offsetList),
+                () -> drive.getPose()));
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(

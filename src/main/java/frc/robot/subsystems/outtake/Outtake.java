@@ -69,8 +69,11 @@ public class Outtake extends SubsystemBase {
             },
             this)
         .until(() -> inputs.isCorralDetected)
-        .andThen(() -> io.stop())
-        .finallyDo(() -> StateHandlerConstants.rumble(0.8, 0.5).schedule());
+        .finallyDo(() -> io.stop());
+  }
+
+  public void setOuttakeVolts(double volts){
+    io.intake(volts);
   }
 
   public Command overideShoot(DoubleSupplier forward, DoubleSupplier backward) {

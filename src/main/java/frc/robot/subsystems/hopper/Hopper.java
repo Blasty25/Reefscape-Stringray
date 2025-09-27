@@ -7,6 +7,7 @@ package frc.robot.subsystems.hopper;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.StateHandlerConstants;
 import frc.robot.subsystems.outtake.Outtake;
 import org.littletonrobotics.junction.Logger;
 
@@ -47,13 +48,14 @@ public class Hopper extends SubsystemBase {
   public Command autoIntake(Outtake outtake, double hopperVolts, double outtakeIntakeVolts) {
     return Commands.run(
             () -> {
+              outtake.setOuttakeVolts(outtakeIntakeVolts);
               this.setVoltage(hopperVolts);
-              outtake.intake(outtakeIntakeVolts);
             },
             this)
         .until(() -> outtake.isDetected())
         .finallyDo(
             () -> {
+              StateHandlerConstants.rumble(0.8, 0.5).schedule();
               this.setVoltage(0.0);
               outtake.stop();
             });

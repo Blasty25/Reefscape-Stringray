@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.StateHandlerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveCommands;
 import frc.robot.subsystems.elevator.Elevator;
@@ -287,7 +288,11 @@ public class AutoAlign extends SubsystemBase {
               zPID.reset(drive.getRotation().getRadians());
             })
         .until(() -> xPID.atSetpoint() && yPID.atSetpoint() && zPID.atSetpoint())
-        .finallyDo(() -> drive.stop());
+        .finallyDo(
+            () -> {
+              drive.stopWithX();
+              StateHandlerConstants.rumble(0.5, 0.8);
+            });
   }
 
   public Command visionAutoAlignRight(Drive drive, Elevator elevator) {
@@ -340,7 +345,11 @@ public class AutoAlign extends SubsystemBase {
               zPID.reset(drive.getRotation().getRadians());
             })
         .until(() -> xPID.atSetpoint() && yPID.atSetpoint() && zPID.atSetpoint())
-        .finallyDo(() -> drive.stop());
+        .finallyDo(
+            () -> {
+              drive.stopWithX();
+              StateHandlerConstants.rumble(0.5, 0.8);
+            });
   }
 
   public static boolean isNear(Pose2d target, Pose2d actual) {
