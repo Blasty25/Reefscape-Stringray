@@ -62,13 +62,14 @@ public class Outtake extends SubsystemBase {
   }
 
   // Intake corral with 12 volts and stop once its detected!
-  public Command intake() {
+  public Command intake(double volts) {
     return Commands.run(
             () -> {
-              io.intake();
+              io.intake(volts);
             },
             this)
         .until(() -> inputs.isCorralDetected)
+        .andThen(()-> io.stop())
         .finallyDo(() -> StateHandlerConstants.rumble(0.8, 0.5).schedule());
   }
 

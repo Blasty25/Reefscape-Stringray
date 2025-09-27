@@ -31,4 +31,5 @@ public class StateHandlerConstants {
 
   public static final double HOPPER_INTAKE_VOLTAGE = 3.5;
   public static final double OUTTAKE_INTAKE_VOLTAGE = 5.0;
+  
 }

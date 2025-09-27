@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.StateHandlerConstants;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.outtake.Outtake;
 import frc.robot.util.AllianceFlipUtil;
@@ -137,9 +138,9 @@ public class DriveCommands {
           Logger.recordOutput("AutoIntake/RelativePose/Pose2", distanceFromRightIntake);
           if (distanceFromLeftIntake <= range || distanceFromRightIntake <= range) {
             hopper.setTrackPercent(1.0);
-            outtake.intake().schedule();
+            outtake.intake(StateHandlerConstants.OUTTAKE_INTAKE_VOLTAGE).schedule();
           } else {
-            outtake.intake().cancel();
+            outtake.intake(StateHandlerConstants.OUTTAKE_INTAKE_VOLTAGE).cancel();
             hopper.setTrackPercent(0.0);
             outtake.stop();
           }

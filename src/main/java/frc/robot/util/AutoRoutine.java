@@ -1,10 +1,13 @@
 package frc.robot.util;
 
+import static frc.robot.StateHandlerConstants.OUTTAKE_INTAKE_VOLTAGE;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.StateHandlerConstants;
 import frc.robot.subsystems.autoAlign.AutoAlign;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -63,7 +66,7 @@ public class AutoRoutine extends SubsystemBase {
         elevator.setExtension(),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
-        hopper.autoIntake(outtake),
+        hopper.autoIntake(outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(3.88, 5.28, Rotation2d.fromDegrees(-60.47))),
         elevator.setTarget(ElevatorSetpoint.L4),
@@ -74,7 +77,7 @@ public class AutoRoutine extends SubsystemBase {
         elevator.setExtension(),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
-        hopper.autoIntake(outtake),
+        hopper.autoIntake(outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(3.61, 5.07, Rotation2d.fromDegrees(-59.06))),
         elevator.setTarget(ElevatorSetpoint.L4),
@@ -85,7 +88,7 @@ public class AutoRoutine extends SubsystemBase {
         elevator.setExtension(),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(1.16, 6.96, Rotation2d.fromDegrees(-57.77))),
-        hopper.autoIntake(outtake),
+        hopper.autoIntake(outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
         autoAlign.driveToPreSelectedPose(drive, new Pose2d(3.13, 4.19, new Rotation2d())),
         elevator.setTarget(ElevatorSetpoint.L4),
         elevator.setExtension(),
@@ -95,7 +98,7 @@ public class AutoRoutine extends SubsystemBase {
         elevator.setExtension(),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(1.25, 0.89, Rotation2d.fromDegrees(49.73))),
-        hopper.autoIntake(outtake),
+        hopper.autoIntake(outtake, StateHandlerConstants.HOPPER_INTAKE_VOLTAGE, OUTTAKE_INTAKE_VOLTAGE),
         autoAlign.driveToPreSelectedPose(
             drive, new Pose2d(3.78, 2.83, Rotation2d.fromDegrees(55.8))),
         elevator.setTarget(ElevatorSetpoint.L4),

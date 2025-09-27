@@ -44,14 +44,18 @@ public class Hopper extends SubsystemBase {
     return Commands.runOnce(() -> io.stop());
   }
 
-  public Command autoIntake(Outtake outtake) {
+  public Command autoIntake(Outtake outtake, double hopperVolts, double outtakeIntakeVolts) {
     return Commands.run(
-            () -> {
-              this.setVoltage(1.0);
-              outtake.intake();
-            },
-            this)
-        .until(() -> outtake.isDetected());
+        () -> {
+          this.setVoltage(hopperVolts);
+          outtake.intake(outtakeIntakeVolts);
+        },
+        this)
+        .until(() -> outtake.isDetected())
+        .finallyDo(() -> {
+          this.setVoltage(0.0);
+          outtake.stop();
+        });
   }
 
   public Command eject() {
@@ -59,15 +63,16 @@ public class Hopper extends SubsystemBase {
         () -> {
           this.setVoltage(-12.0);
         },
-        this);
+        this)
+        .finallyDo(() -> this.setVoltage(0.0));
   }
 
   public Command intake(Outtake outtake, double intakeVolts) {
     return Commands.run(
-            () -> {
-              this.setVoltage(intakeVolts);
-            },
-            this)
+        () -> {
+          this.setVoltage(intakeVolts);
+        },
+        this)
         .until(() -> outtake.isDetected())
         .finallyDo(() -> io.stop());
   }

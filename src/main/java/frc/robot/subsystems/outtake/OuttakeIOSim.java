@@ -71,13 +71,13 @@ public class OuttakeIOSim implements OuttakeIO {
    * set isDetected to true
    */
   @Override
-  public void intake() {
+  public void intake(double volts) {
     if (isDetectedInSim.get()) {
       carriage.setInputVoltage(0);
       return;
     } else {
       Logger.recordOutput("/Outtake/Intaking", true);
-      carriage.setInputVoltage(6);
+      carriage.setInputVoltage(volts);
       return;
     }
   }

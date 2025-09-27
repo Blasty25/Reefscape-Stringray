@@ -36,7 +36,7 @@ public interface OuttakeIO {
 
   public default void eject(double eject) {}
 
-  public default void intake() {}
+  public default void intake(double volts) {}
 
   public default void stop() {}
 

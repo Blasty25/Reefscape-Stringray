@@ -116,8 +116,8 @@ public class OuttakeIOTalonFX implements OuttakeIO {
   }
 
   @Override
-  public void intake() {
-    talon.setControl(voltageOut.withOutput(5.0)); // intake full speed
+  public void intake(double volts) {
+    talon.setControl(voltageOut.withOutput(volts)); // intake full speed
   }
 
   @Override
