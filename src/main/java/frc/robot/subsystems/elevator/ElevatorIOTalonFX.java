@@ -200,7 +200,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     slot0Configs.withKP(kP.getAsDouble());
     slot0Configs.withKI(kI.getAsDouble());
     slot0Configs.withKD(kD.getAsDouble());
-    left.getConfigurator().apply(slot0Configs, 0.0);
+    left.getConfigurator().apply(slot0Configs, 0.25);
   }
 
   private void resetFFValues() {
@@ -209,7 +209,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     slot0Configs.withKA(kA.getAsDouble());
     slot0Configs.withKG(kG.getAsDouble());
     slot0Configs.withKS(kS.getAsDouble());
-    left.getConfigurator().apply(slot0Configs, 0.0);
+    left.getConfigurator().apply(slot0Configs, 0.25);
   }
 
   @Override

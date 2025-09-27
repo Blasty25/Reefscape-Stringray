@@ -1,13 +1,11 @@
 package frc.robot.subsystems.autoAlign;
 
 import static frc.robot.subsystems.autoAlign.AutoAlignConstants.*;
-import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,7 +29,10 @@ public class AutoAlign extends SubsystemBase {
   public static Pose2d FINAL_CORAL_POSE;
   public static Pose2d FINAL_ALGAE_POSE;
   public static Pose2d FINAL_CAGE_POSE;
-  public static double L4_BACK_DISTANCE = 2.5; //INCHS
+  public static Pose2d FINAL_VISION_ALLIGNMENT;
+  public static double L4_BACK_DISTANCE = 2.5; // INCHS
+  public static double AUTOALIGN_BACKUP_X = 18.0;
+  public static double AUTOALIGN_BACKUP_Y = 10.0;
 
   private PIDController xPID =
       new PIDController(xP.getAsDouble(), xI.getAsDouble(), xD.getAsDouble());
@@ -236,14 +237,76 @@ public class AutoAlign extends SubsystemBase {
 
   // Experimental Auto Aligning using Vision
   // DEBUGGING NOT OFFICIAL USE
-  public Command visionAutoAlign(Drive drive) {
-    return Commands.run(
+  public Command visionAutoAlignLeft(Drive drive, Elevator elevator) {
+    return Commands.startRun(
             () -> {
-              int tagId = AutoAlignConstants.getClosestTagId(drive.getPose());
+              Pose2d pose = drive.getPose().nearest(nearestReefPoseLeft);
+              if (elevator.getNextExpectedSetpoint() == ElevatorSetpoint.L4) {
+                Logger.recordOutput("AutoAlign/HasL4", true);
 
-              Pose3d allinment = aprilTagLayout.getTagPose(tagId).orElse(null);
+                double backMeters = -Units.inchesToMeters(L4_BACK_DISTANCE); // negative = backwards
+                Transform2d backwardsTransform =
+                    new Transform2d(new Translation2d(backMeters, 0.0), new Rotation2d());
+                pose = pose.plus(backwardsTransform);
+              }
+              FINAL_CORAL_POSE = pose;
+              Logger.recordOutput("AutoAlign/Target", FINAL_CORAL_POSE);
+            },
+            () -> {
+              Pose2d pose = FINAL_CORAL_POSE;
 
-              Pose2d pose = allinment.toPose2d();
+              Logger.recordOutput("AutoAlign/ClimbPose", pose);
+              Logger.recordOutput("AutoAlign/xPID", xPID.getError());
+              Logger.recordOutput("AutoAlign/yPID", yPID.getError());
+
+              ChassisSpeeds driveToPoseSpeeds =
+                  new ChassisSpeeds(
+                      xPID.calculate(drive.getPose().getX(), pose.getX()),
+                      yPID.calculate(drive.getPose().getY(), pose.getY()),
+                      zPID.calculate(
+                          drive.getRotation().getRadians(), pose.getRotation().getRadians()));
+
+              // Set Chassis Speeds
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      driveToPoseSpeeds,
+                      isFlipped
+                          ? drive
+                              .getRotation()
+                              .plus(AllianceFlipUtil.apply(new Rotation2d(Math.PI)))
+                          : drive.getRotation()));
+            },
+            drive)
+        .beforeStarting(
+            () -> {
+              xPID.reset();
+              yPID.reset();
+              zPID.reset(drive.getRotation().getRadians());
+            })
+        .until(() -> xPID.atSetpoint() && yPID.atSetpoint() && zPID.atSetpoint())
+        .finallyDo(() -> drive.stop());
+  }
+
+  public Command visionAutoAlignRight(Drive drive, Elevator elevator) {
+    return Commands.startRun(
+            () -> {
+              Pose2d pose = drive.getPose().nearest(nearestReefPoseRight);
+              if (elevator.getNextExpectedSetpoint() == ElevatorSetpoint.L4) {
+                Logger.recordOutput("AutoAlign/HasL4", true);
+
+                double backMeters = -Units.inchesToMeters(L4_BACK_DISTANCE); // negative = backwards
+                Transform2d backwardsTransform =
+                    new Transform2d(new Translation2d(backMeters, 0.0), new Rotation2d());
+                pose = pose.plus(backwardsTransform);
+              }
+              FINAL_CORAL_POSE = pose;
+              Logger.recordOutput("AutoAlign/Target", FINAL_CORAL_POSE);
+            },
+            () -> {
+              Pose2d pose = drive.getPose().nearest(nearestReefPoseRight);
 
               Logger.recordOutput("AutoAlign/ClimbPose", pose);
               Logger.recordOutput("AutoAlign/xPID", xPID.getError());
@@ -287,5 +350,38 @@ public class AutoAlign extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    // Update the xpid when changed
+    if (xP.hasChanged(hashCode())) {
+      xPID.setP(xP.get());
+    }
+    if (xI.hasChanged(hashCode())) {
+      xPID.setI(xI.get());
+    }
+    if (xD.hasChanged(hashCode())) {
+      xPID.setD(xD.get());
+    }
+
+    // Update the ypid when changed
+    if (yP.hasChanged(hashCode())) {
+      yPID.setP(yP.get());
+    }
+    if (yI.hasChanged(hashCode())) {
+      yPID.setI(yI.get());
+    }
+    if (yD.hasChanged(hashCode())) {
+      yPID.setD(yD.get());
+    }
+
+    // Update the zpid when changed
+    if (zP.hasChanged(hashCode())) {
+      zPID.setP(zP.get());
+    }
+    if (zI.hasChanged(hashCode())) {
+      zPID.setI(zI.get());
+    }
+    if (zD.hasChanged(hashCode())) {
+      zPID.setD(zD.get());
+    }
+  }
 }

@@ -42,17 +42,25 @@ public class VisionConstants {
           new Rotation3d(0.0, -Units.degreesToRadians(13.125000), Units.degreesToRadians(30)));
 
   // Basic filtering thresholds
-  public static double maxSingleTagAmbiguity = 0.4;
-  public static double maxZErrorMeters = 0.1;
+  public static double maxSingleTagAmbiguity = 0.3;
+  public static double maxZErrorMeters = 0.75;
   public static double maxSingleTagDistanceMeters = 1.25;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double trigLinearStdDevBaseline = 0.1; // Meters
-  public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; // Radians
+  // public static double trigLinearStdDevBaseline = 0.1; // Meters
+  // public static double trigAngularStdDevBaseline = Double.POSITIVE_INFINITY; //
+  // Radians
 
-  public static double multitagLinearStdDevBaseline = 0.35; // Meters
-  public static double multitagAngularStdDevBaseline = 0.14; // Radians
+  // public static double multitagLinearStdDevBaseline = 0.35; // Meters
+  // public static double multitagAngularStdDevBaseline = 0.14; // Radians
+
+  public static double linearStdDevBaseline = 0.02; // Meters
+  public static double angularStdDevBaseline = 0.06; // Radians
+
+  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double angularStdDevMegatag2Factor =
+      Double.POSITIVE_INFINITY; // No rotation data available
 
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)

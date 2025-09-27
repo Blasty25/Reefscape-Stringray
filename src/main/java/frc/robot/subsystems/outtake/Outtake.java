@@ -69,7 +69,7 @@ public class Outtake extends SubsystemBase {
             },
             this)
         .until(() -> inputs.isCorralDetected)
-        .andThen(()-> io.stop())
+        .andThen(() -> io.stop())
         .finallyDo(() -> StateHandlerConstants.rumble(0.8, 0.5).schedule());
   }
 

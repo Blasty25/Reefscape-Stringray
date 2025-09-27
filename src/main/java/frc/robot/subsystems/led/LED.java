@@ -19,7 +19,6 @@ public class LED extends SubsystemBase {
   private Animation disabledAnimation;
   private RobotState state = RobotState.Idle;
 
-
   public LED(LEDIO io) {
     this.io = io;
     color =
@@ -108,12 +107,11 @@ public class LED extends SubsystemBase {
       setIndex(i, new Color(red, green, blue));
     }
   }
-  
+
   public Command setState(RobotState kState) {
     return this.run(
         () -> {
           this.state = kState;
         });
   }
-
 }

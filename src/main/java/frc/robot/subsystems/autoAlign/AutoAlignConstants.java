@@ -7,42 +7,76 @@ package frc.robot.subsystems.autoAlign;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 public class AutoAlignConstants {
-
-  public static int getClosestTagId(Pose2d robotPose) {
-    int closestId = -1;
-    double closestDist = Double.MAX_VALUE;
-
-    AprilTagFieldLayout layout =
-        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
-
-    for (int id = 6; id <= 11; id++) {
-      Optional<Pose3d> tagPose3d = layout.getTagPose(id);
-      if (tagPose3d.isEmpty()) continue;
-
-      Pose2d tagPose2d = tagPose3d.get().toPose2d();
-      double dist = robotPose.getTranslation().getDistance(tagPose2d.getTranslation());
-
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestId = id;
-      }
-    }
-
-    return closestId;
-  }
+  public static AprilTagFieldLayout aprilTagLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
   public static List<Pose2d> leftPersPose = new ArrayList<>();
   public static List<Pose2d> rightPersPose = new ArrayList<>();
   public static List<Pose2d> algaePose = new ArrayList<>();
   public static List<Pose2d> cagePoses = new ArrayList<>();
+  public static HashMap<Integer, Pose2d> aprilPoses = new HashMap<>();
+  public static List<Pose2d> nearestReefPoseLeft = new ArrayList<>();
+  public static List<Pose2d> nearestReefPoseRight = new ArrayList<>();
+  public static List<Pose2d> offsetList = new ArrayList<>();
+
+  public static double AUTOALIGN_BACKUP_X = 18.0;
+  public static double AUTOALIGN_BACKUP_Y = 10.0;
+  public static Transform2d backwardsLeftTransform =
+      new Transform2d(
+          new Translation2d(
+              Units.inchesToMeters(AUTOALIGN_BACKUP_X), Units.inchesToMeters(AUTOALIGN_BACKUP_Y)),
+          Rotation2d.fromDegrees(-180));
+  public static Transform2d backwardsRightTransform =
+      new Transform2d(
+          new Translation2d(
+              Units.inchesToMeters(AUTOALIGN_BACKUP_X), -Units.inchesToMeters(AUTOALIGN_BACKUP_Y)),
+          Rotation2d.fromDegrees(-180));
+
+  public static void getAprilTagPoses() {
+    for (int i = 17; i < 23; i++) {
+      aprilPoses.put(i, aprilTagLayout.getTagPose(i).get().toPose2d());
+      offsetList.add(aprilTagLayout.getTagPose(i).get().toPose2d());
+    }
+
+    for (int i = 6; i < 12; i++) {
+      aprilPoses.put(i, aprilTagLayout.getTagPose(i).get().toPose2d());
+      offsetList.add(aprilTagLayout.getTagPose(i).get().toPose2d());
+    }
+
+    for (int i = 6; i < 9; i++) {
+      Pose2d pose = aprilPoses.get(i);
+      nearestReefPoseLeft.add(pose.plus(backwardsRightTransform));
+      nearestReefPoseRight.add(pose.plus(backwardsLeftTransform));
+    }
+
+    for (int i = 9; i < 12; i++) {
+      Pose2d pose = aprilPoses.get(i);
+      nearestReefPoseRight.add(pose.plus(backwardsRightTransform));
+      nearestReefPoseLeft.add(pose.plus(backwardsLeftTransform));
+    }
+
+    for (int i = 17; i < 20; i++) {
+      Pose2d pose = aprilPoses.get(i);
+      nearestReefPoseLeft.add(pose.plus(backwardsRightTransform));
+      nearestReefPoseRight.add(pose.plus(backwardsLeftTransform));
+    }
+
+    for (int i = 20; i < 23; i++) {
+      Pose2d pose = aprilPoses.get(i);
+      nearestReefPoseRight.add(pose.plus(backwardsRightTransform));
+      nearestReefPoseLeft.add(pose.plus(backwardsLeftTransform));
+    }
+  }
 
   public static LoggedTunableNumber xP = new LoggedTunableNumber("AutoAlign/XDrive/kP", 6.0);
   public static LoggedTunableNumber xI = new LoggedTunableNumber("AutoAlign/XDrive/kI", 0.0);

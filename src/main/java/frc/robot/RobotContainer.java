@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.autoAlign.AutoAlign;
+import frc.robot.subsystems.autoAlign.AutoAlignConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
@@ -58,6 +59,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.AutoRoutine;
+import frc.robot.util.PoseUtils;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -93,8 +95,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision(leftCam, robotToLeftCam, drive::getRotation),
-                new VisionIOPhotonVision(rightCam, robotToRightCam, drive::getRotation));
+                new VisionIOPhotonVision(leftCam, robotToLeftCam),
+                new VisionIOPhotonVision(rightCam, robotToRightCam));
 
         // outtake = new Outtake(new OuttakeIOTalonFX());
         outtake = new Outtake(new OuttakeIO() {});
@@ -154,6 +156,8 @@ public class RobotContainer {
 
     autoRoutine = new AutoRoutine(drive, autoAlign, hopper, outtake, elevator, led);
 
+    AutoAlignConstants.getAprilTagPoses();
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -207,6 +211,11 @@ public class RobotContainer {
     operatorOveride.a().whileTrue(hopper.overideVoltage(12.0));
     operatorOveride.b().whileTrue(hopper.overideVoltage(-12.0));
     operatorOveride.y().whileTrue(elevator.overideElevator(() -> -operatorOveride.getLeftY()));
+    controller
+        .x()
+        .onTrue(
+            PoseUtils.getOffsets(()->
+                drive.getPose().nearest(AutoAlignConstants.offsetList),()-> drive.getPose()));
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(

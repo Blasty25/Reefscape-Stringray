@@ -25,7 +25,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,10 +35,6 @@ public class Vision extends SubsystemBase {
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
-
-  public static boolean blind = false;
-
-  private Pose2d lastPose;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -56,7 +51,7 @@ public class Vision extends SubsystemBase {
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
           new Alert(
-              "Vision Camera " + Integer.toString(i) + " is Disconnected.", AlertType.kWarning);
+              "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
     }
   }
 
@@ -102,14 +97,12 @@ public class Vision extends SubsystemBase {
       }
 
       // Loop over pose observations
-      for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
+      for (var observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                    // Cannot be high ambiguity or too far away if single tag
-                    && (observation.ambiguity() > maxSingleTagAmbiguity
-                        || observation.averageTagDistance() > maxSingleTagDistanceMeters))
+                    && observation.ambiguity() > maxSingleTagAmbiguity) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
                     > maxZErrorMeters // Must have realistic Z coordinate
 
@@ -117,8 +110,7 @@ public class Vision extends SubsystemBase {
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > aprilTagLayout.getFieldWidth()
-                || blind;
+                || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
         // Add pose to log
         robotPoses.add(observation.pose());
@@ -136,29 +128,17 @@ public class Vision extends SubsystemBase {
         // Calculate standard deviations
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-        double linearStdDev =
-            (observation.type() == PoseObservationType.PHOTONVISION_SINGLE
-                    ? trigLinearStdDevBaseline
-                    : multitagLinearStdDevBaseline)
-                * stdDevFactor;
-        // double linearStdDev = enabledLinearStdDevBaseline * stdDevFactor;
-
-        double angularStdDev =
-            (observation.type() == PoseObservationType.PHOTONVISION_SINGLE
-                    ? trigAngularStdDevBaseline
-                    : multitagAngularStdDevBaseline)
-                * stdDevFactor;
-        // double angularStdDev = enabledAngularStdDevBaseline * stdDevFactor;
-
+        double linearStdDev = linearStdDevBaseline * stdDevFactor;
+        double angularStdDev = angularStdDevBaseline * stdDevFactor;
+        if (observation.type() == PoseObservationType.MEGATAG_2) {
+          linearStdDev *= linearStdDevMegatag2Factor;
+          angularStdDev *= angularStdDevMegatag2Factor;
+        }
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
           angularStdDev *= cameraStdDevFactors[cameraIndex];
         }
-        Logger.recordOutput(
-            "Vision/Camera" + Integer.toString(cameraIndex) + "/xythetaStdDevs",
-            new double[] {linearStdDev, linearStdDev, angularStdDev});
 
-        lastPose = observation.pose().toPose2d();
         // Send vision observation
         consumer.accept(
             observation.pose().toPose2d(),
@@ -204,9 +184,5 @@ public class Vision extends SubsystemBase {
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs);
-  }
-
-  public Pose2d getInitPose() {
-    return lastPose;
   }
 }
